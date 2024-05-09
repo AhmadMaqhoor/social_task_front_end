@@ -108,6 +108,16 @@ class _NavSideBarState extends State<NavSideBar> {
               Navigator.pushNamed(context, '/company');
             },
           ),
+          const SizedBox(
+            height: 180,
+          ),
+          ListTile(
+            leading: const Icon(Icons.open_in_browser_rounded),
+            title: const Text('Social App'),
+            onTap: () {
+              Navigator.pushNamed(context, '/home');
+            },
+          ),
         ],
       ),
     );

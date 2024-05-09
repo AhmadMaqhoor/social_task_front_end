@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:isd_project/auth/login.dart';
 import 'package:isd_project/auth/signup.dart';
+import 'package:isd_project/socialapp/createpost.dart';
+import 'package:isd_project/socialapp/explore.dart';
+import 'package:isd_project/socialapp/home.dart';
+import 'package:isd_project/socialapp/notifications.dart';
+import 'package:isd_project/socialapp/profile.dart';
+import 'package:isd_project/socialapp/search.dart';
 import 'package:isd_project/taskmanager/addtask.dart';
 import 'package:isd_project/taskmanager/company.dart';
 import 'package:isd_project/taskmanager/completed.dart';
@@ -32,6 +38,12 @@ class MyApp extends StatelessWidget {
       '/company': (context) => const CompanyPage(),
       '/profile': (context) => const ProfilePage(),
       '/productivity': (context) => const ProductivityPage(),
+      '/home': (context) => const HomePage(),
+      '/explore': (context) => const ExplorePage(),
+      '/notifications': (context) => const NotificationPage(),
+      '/search': (context) => const SearchPage(),
+      '/createpost': (context) => const CreatePostPage(),
+      '/socialprofile': (context) => const SocialProfilePage(),
     });
   }
 }
