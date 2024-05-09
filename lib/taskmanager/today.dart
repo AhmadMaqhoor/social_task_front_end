@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:isd_project/taskmanager/navigationbar.dart';
+import 'package:isd_project/taskmanager/todayorganizationtask.dart';
+import 'package:isd_project/taskmanager/todaytasklist.dart'; // Import your TodayTasksScreen if it exists
 
 class TodayPage extends StatefulWidget {
   const TodayPage({super.key});
@@ -11,6 +13,19 @@ class TodayPage extends StatefulWidget {
 class _TodayPageState extends State<TodayPage> {
   String _selectedItem = 'My Tasks';
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+
+  Widget _buildTaskList(String selectedItem) {
+    if (selectedItem == 'My Tasks') {
+      // Fetch and display today's tasks
+      return TodayTasksScreen(); // Use your TodayTasksScreen widget here
+    } else if (selectedItem == 'My Companies') {
+     return TodayOrganizationTasksScreen();
+      
+    } else {
+      return Container(); // Fallback
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +36,7 @@ class _TodayPageState extends State<TodayPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               IconButton(
-                icon: const Icon(Icons.hide_source),
+                icon: const Icon(Icons.menu),
                 onPressed: () {
                   _scaffoldKey.currentState?.openDrawer();
                 },
@@ -45,7 +60,6 @@ class _TodayPageState extends State<TodayPage> {
                         ),
                       ),
                     ),
-
                     Padding(
                       padding: const EdgeInsets.fromLTRB(15, 5, 0, 0),
                       child: DropdownButtonHideUnderline(
@@ -71,9 +85,7 @@ class _TodayPageState extends State<TodayPage> {
                           },
                           items: <String>[
                             'My Tasks',
-                            'Company 1',
-                            'Company 2',
-                            'Company 3'
+                            'My Companies',
                           ].map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
@@ -83,8 +95,6 @@ class _TodayPageState extends State<TodayPage> {
                         ),
                       ),
                     ),
-
-                    // should show the tasks here later
                     const Divider(
                       color: Colors.black,
                     ),
@@ -103,6 +113,9 @@ class _TodayPageState extends State<TodayPage> {
                 ),
               ),
             ],
+          ),
+          Expanded(
+            child: _buildTaskList(_selectedItem),
           ),
         ],
       ),

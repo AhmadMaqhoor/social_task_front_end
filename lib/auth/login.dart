@@ -1,5 +1,8 @@
 import "package:flutter/material.dart";
-
+import 'package:http/http.dart' as http;
+import 'package:isd_project/taskmanager/today.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -9,10 +12,62 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String email = '';
-  String password = '';
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+ bool _isPasswordVisible = true;
+  Future<void> login() async {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+  
 
-  bool _isPasswordVisible = true;
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:8000/api/auth/login'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      final String accessToken = responseData['access_token'];
+
+      // Save access token to shared preferences
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString('accessToken', accessToken);
+
+      // Navigate to home screen or do any other action
+       // Navigate to create task screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => TodayPage()),
+      );
+    } else {
+      // Display error message
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Failed to login. Please check your credentials.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  
 
   void _togglePasswordVisibility() {
     setState(() {
@@ -75,9 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10.0, 0, 10, 0),
                   child: TextFormField(
-                    onChanged: (val) {
-                      setState(() => email = val);
-                    },
+                     controller: _emailController,
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.email),
                       border: OutlineInputBorder(
@@ -116,9 +169,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: TextFormField(
                     obscureText: _isPasswordVisible,
-                    onChanged: (val) {
-                      setState(() => password = val);
-                    },
+                    controller: _passwordController,
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: GestureDetector(
@@ -172,9 +223,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        print(email);
-                        print(password);
-                        Navigator.pushNamed(context, '/inbox');
+                       login();
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,

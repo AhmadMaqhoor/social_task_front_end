@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:isd_project/auth/login.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -8,12 +12,95 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-  String username = '';
-  String email = '';
-  String password = '';
-  String passwordconfirm = '';
-
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _isPasswordVisible = true;
+
+  Future<void> register() async {
+    final String name = _nameController.text.trim();
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+    final String confirmPassword = _confirmPasswordController.text.trim();
+
+    if (password != confirmPassword) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Passwords do not match.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:8000/api/auth/register'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json', // Add this line
+      },
+      body: jsonEncode(<String, String>{
+        'name': name,
+        'email': email,
+        'password': password,
+        'password_confirmation': confirmPassword
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Success'),
+            content: Text('User successfully registered.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginPage()),
+                  );
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Failed to register user. Please try again later.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 
   void _togglePasswordVisibility() {
     setState(() {
@@ -75,9 +162,7 @@ class _SignupPageState extends State<SignupPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10.0, 0, 10, 0),
                   child: TextFormField(
-                    onChanged: (val) {
-                      setState(() => username = val);
-                    },
+                    controller: _nameController,
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.account_box),
                       border: OutlineInputBorder(
@@ -109,9 +194,7 @@ class _SignupPageState extends State<SignupPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10.0, 0, 10, 0),
                   child: TextFormField(
-                    onChanged: (val) {
-                      setState(() => email = val);
-                    },
+                    controller: _emailController,
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.email),
                       border: OutlineInputBorder(
@@ -144,9 +227,7 @@ class _SignupPageState extends State<SignupPage> {
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: TextFormField(
                     obscureText: _isPasswordVisible,
-                    onChanged: (val) {
-                      setState(() => password = val);
-                    },
+                    controller: _passwordController,
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: GestureDetector(
@@ -187,9 +268,7 @@ class _SignupPageState extends State<SignupPage> {
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: TextFormField(
                     obscureText: _isPasswordVisible,
-                    onChanged: (val) {
-                      setState(() => passwordconfirm = val);
-                    },
+                    controller: _confirmPasswordController,
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.key),
                       border: OutlineInputBorder(
@@ -216,15 +295,7 @@ class _SignupPageState extends State<SignupPage> {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        if (password == passwordconfirm) {
-                          print(username);
-                          print(email);
-                          print(password);
-                          print('signup successfull');
-                          Navigator.pop(context);
-                        } else {
-                          print('passwords does not match');
-                        }
+                        register();
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,

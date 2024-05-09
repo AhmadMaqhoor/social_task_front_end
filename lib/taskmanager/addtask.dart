@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:isd_project/taskmanager/calendar.dart';
-import 'package:isd_project/taskmanager/task.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:isd_project/taskmanager/today.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 class AddTaskPage extends StatefulWidget {
   const AddTaskPage({super.key});
 
@@ -10,11 +13,66 @@ class AddTaskPage extends StatefulWidget {
 }
 
 class _AddTaskPageState extends State<AddTaskPage> {
-  String title = '';
-  String description = '';
-  DateTime duedate = DateTime.now();
-  DateTime reminder = DateTime.now();
-  String priority = 'priority 1';
+ final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+   DateTime duedate = DateTime.now();
+    String priority="low";
+
+  Future<void> createTask() async {
+    final String title = _titleController.text.trim();
+    final String description = _descriptionController.text.trim();
+     String formattedDueDate = DateFormat('yyyy-MM-dd').format(duedate);
+     priority = priority.trim();
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+     print('Access Token: $accessToken');
+
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/create-task'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: jsonEncode(<String, String>{
+        'title': title,
+        'description': description,
+        'due_date': formattedDueDate ,
+        'priority': priority,
+        "reminder":"0"
+        // Add other fields as needed
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      // Task created successfully
+      // You can navigate to another screen or show a success message
+       Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => TodayPage()),
+      );
+    } else {
+      // Display error message
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Failed to create task. Please try again later.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 
   void dropdownCallback(String? selectedValue) {
     selectedValue is String
@@ -22,7 +80,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
             priority = selectedValue;
           })
         : setState(() {
-            priority = 'priority 1';
+            priority = 'high';
           });
   }
 
@@ -67,9 +125,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                   child: TextFormField(
-                    onChanged: (val) {
-                      setState(() => title = val);
-                    },
+                    controller:_titleController,
                     decoration: const InputDecoration(
                       hintText: 'title of the task',
                     ),
@@ -78,9 +134,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                   child: TextFormField(
-                    onChanged: (val) {
-                      setState(() => description = val);
-                    },
+                   controller:_descriptionController,
                     decoration: const InputDecoration(
                       hintText: 'Description for the task',
                     ),
@@ -97,8 +151,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
                       CustomDatePicker(
                         initialDate: DateTime.now(),
                         onDateSelected: (DateTime selectedDate) {
-                          print('Selected date: $selectedDate');
-                          duedate = selectedDate;
+                         
+                          duedate = selectedDate ;
+                           print('Selected date: $duedate');
                         },
                       ),
                       const SizedBox(
@@ -108,13 +163,12 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         child: DropdownButton(
                           items: const [
                             DropdownMenuItem(
-                                value: 'priority 1', child: Text('priority 1')),
+                                value: 'high', child: Text('HIGH')),
                             DropdownMenuItem(
-                                value: 'priority 2', child: Text('priority 2')),
+                                value: 'medium', child: Text('MEDIUM')),
                             DropdownMenuItem(
-                                value: 'priority 3', child: Text('priority 3')),
-                            DropdownMenuItem(
-                                value: 'priority 4', child: Text('priority 4')),
+                                value: 'low', child: Text('LOW')),
+                           
                           ],
                           value: priority,
                           onChanged: dropdownCallback,
@@ -166,18 +220,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   padding: const EdgeInsets.fromLTRB(200, 0, 0, 15),
                   child: ElevatedButton(
                       onPressed: () {
-                        Task(
-                            title: title,
-                            description: description,
-                            duedate: duedate,
-                            reminder: reminder,
-                            priority: priority);
-                        print(title);
-                        print(description);
-                        print(duedate);
-                        print(reminder);
-                        print(priority);
-                        Navigator.pop(context);
+                       createTask();
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
