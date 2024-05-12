@@ -1,21 +1,54 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  const ProfilePage({Key? key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String _username = 'Xela';
-  String _email = 'Xela@gmail.com';
-  String _rank = 'Maniac';
+  String? _username;
+  String? _email;
+  String? _imageUrl;
+  int? _score;
 
-// function for changing the username
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
 
+  Future<void> fetchUserData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+
+    final response = await http.get(
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/profile'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> userData = json.decode(response.body);
+      setState(() {
+        _username = userData['user_profile']['name'];
+        _email = userData['user_profile']['email'];
+        _imageUrl = userData['user_profile']['image'];
+        _score = userData['user_profile']['score'];
+      });
+    } else {
+      print('Failed to load user data');
+    }
+  }
+
+  // Function for changing the username
   void _changeUsername(BuildContext context) {
-    String newUsername = _username;
+    String newUsername = _username ?? '';
 
     showDialog(
       context: context,
@@ -50,10 +83,9 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-// function for changing the email
-
+  // Function for changing the email
   void _changeEmail(BuildContext context) {
-    String newEmail = _email; // Initialize with current email
+    String newEmail = _email ?? ''; // Initialize with current email
 
     showDialog(
       context: context,
@@ -105,21 +137,23 @@ class _ProfilePageState extends State<ProfilePage> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             Text(
-              '$_rank',
+              '$_score',
               style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
             ),
             SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundImage: NetworkImage(
-                      'https://tse3.mm.bing.net/th?id=OIP.kv7XF77cs6kZ6sr8q89z6AHaEo&pid=Api&P=0&h=220'), // You can replace this with the user's profile picture
-                ),
+                _imageUrl != null
+                    ? CircleAvatar(
+                        radius: 50,
+                        backgroundImage: NetworkImage(_imageUrl!),
+                      )
+                    : CircularProgressIndicator(),
                 SizedBox(width: 16),
                 IconButton(
                   icon: Icon(Icons.edit),
@@ -190,6 +224,5 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
     );
-    ;
   }
 }
