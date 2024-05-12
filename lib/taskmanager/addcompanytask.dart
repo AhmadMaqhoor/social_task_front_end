@@ -1,20 +1,24 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:isd_project/taskmanager/calendar.dart';
 import 'package:isd_project/taskmanager/task.dart';
 
-class AddTaskPage extends StatefulWidget {
-  const AddTaskPage({super.key});
+class AddCompanyTaskPage extends StatefulWidget {
+  const AddCompanyTaskPage({super.key});
 
   @override
-  State<AddTaskPage> createState() => _AddTaskPageState();
+  State<AddCompanyTaskPage> createState() => _AddCompanyTaskPageState();
 }
 
-class _AddTaskPageState extends State<AddTaskPage> {
+class _AddCompanyTaskPageState extends State<AddCompanyTaskPage> {
   String title = '';
   String description = '';
   DateTime duedate = DateTime.now();
   DateTime reminder = DateTime.now();
   String priority = 'priority 1';
+  late String members;
+  late File file;
 
   void dropdownCallback(String? selectedValue) {
     selectedValue is String
@@ -35,14 +39,10 @@ class _AddTaskPageState extends State<AddTaskPage> {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.black,
-                width: 2,
-              ),
-              color: Colors.grey[100],
+              color: Colors.grey[200],
             ),
-            width: 320,
-            height: 300,
+            width: 330,
+            height: 360,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -165,37 +165,74 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   height: 10,
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(200, 0, 0, 15),
-                  child: ElevatedButton(
-                      onPressed: () {
-                        Task(
-                            title: title,
-                            description: description,
-                            duedate: duedate,
-                            reminder: reminder,
-                            priority: priority);
-                        print(title);
-                        print(description);
-                        print(duedate);
-                        print(reminder);
-                        print(priority);
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 0, 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          // Add file functionality
+                        },
+                        icon: Icon(Icons.attach_file),
+                        iconSize: 30,
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Assign members functionality
+                        },
+                        child: Text(
+                          'Members',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           minimumSize: const Size(40, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
-                          )),
-                      child: const Text(
-                        'Add Task',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
+                          ),
                         ),
-                      )),
-                )
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 5),
+                  child: Center(
+                    child: ElevatedButton(
+                        onPressed: () {
+                          Task(
+                              title: title,
+                              description: description,
+                              duedate: duedate,
+                              reminder: reminder,
+                              priority: priority);
+                          print(title);
+                          print(description);
+                          print(duedate);
+                          print(reminder);
+                          print(priority);
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            minimumSize: const Size(40, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            )),
+                        child: const Text(
+                          'Add Task',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        )),
+                  ),
+                ),
               ],
             ),
           ),

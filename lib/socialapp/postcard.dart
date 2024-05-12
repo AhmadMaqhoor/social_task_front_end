@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:isd_project/socialapp/commentspage.dart';
+import 'package:isd_project/socialapp/comment.dart';
+import 'package:isd_project/socialapp/addcomment.dart';
 
 class PostCard extends StatefulWidget {
   const PostCard({super.key});
@@ -88,7 +91,22 @@ class _PostCardState extends State<PostCard> {
           Row(
             children: [
               IconButton(onPressed: () {}, icon: const Icon(Icons.favorite)),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.comment)),
+              IconButton(
+                  onPressed: () {
+                    // Navigate to the AddCommentDialog
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddCommentDialog(
+                          onCommentAdded: (comment) {
+                            // Handle adding the comment here
+                            print('New comment added: $comment');
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.comment)),
               IconButton(onPressed: () {}, icon: const Icon(Icons.share)),
               Expanded(
                   child: Align(
@@ -136,7 +154,22 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CommentsPage(
+                          List.generate(
+                            10,
+                            (index) => Comment(
+                              username: 'User ${index + 1}',
+                              comment: 'This is a sample comment ${index + 1}',
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 5),
                     child: Text(

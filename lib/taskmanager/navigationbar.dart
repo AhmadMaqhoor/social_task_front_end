@@ -1,4 +1,7 @@
 import "package:flutter/material.dart";
+import "package:isd_project/taskmanager/addcompanytask.dart";
+import "package:isd_project/taskmanager/addtaskdialog.dart";
+import "package:isd_project/taskmanager/createcompany.dart";
 
 class NavSideBar extends StatefulWidget {
   const NavSideBar({super.key});
@@ -17,21 +20,9 @@ class _NavSideBarState extends State<NavSideBar> {
           ListTile(
             title: Row(
               children: [
-                InkWell(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/profile');
-                  },
-                  child: Container(
-                    width: 100,
-                    child: const Row(
-                      children: [
-                        Icon(Icons.account_circle),
-                        SizedBox(width: 8),
-                        Text('Profile'),
-                      ],
-                    ),
-                  ),
-                ),
+                Icon(Icons.account_circle),
+                SizedBox(width: 8),
+                Text('Profile'),
                 const Spacer(),
                 InkWell(
                   onTap: () {
@@ -70,7 +61,12 @@ class _NavSideBarState extends State<NavSideBar> {
             leading: const Icon(Icons.add_circle_outline_rounded),
             title: const Text('addtask'),
             onTap: () {
-              Navigator.pushNamed(context, '/addtask');
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AddTaskDialog();
+                },
+              );
             },
           ),
           ListTile(
@@ -103,10 +99,26 @@ class _NavSideBarState extends State<NavSideBar> {
           ),
           ListTile(
             leading: const Icon(Icons.join_full_rounded),
-            title: const Text('company'),
             onTap: () {
               Navigator.pushNamed(context, '/company');
             },
+            title: Row(
+              children: [
+                Text('Company'),
+                const Spacer(),
+                IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CreateCompany();
+                      },
+                    );
+                  },
+                  icon: Icon(Icons.add),
+                ),
+              ],
+            ),
           ),
           const SizedBox(
             height: 180,

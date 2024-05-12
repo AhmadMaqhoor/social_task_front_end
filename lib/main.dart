@@ -26,24 +26,31 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(initialRoute: '/', routes: {
-      '/': (context) => const LoginPage(),
-      '/signup': (context) => const SignupPage(),
-      '/inbox': (context) => const InboxPage(),
-      '/settings': (context) => const SettingsPage(),
-      '/addtask': (context) => const AddTaskPage(),
-      '/today': (context) => const TodayPage(),
-      '/upcoming': (context) => const UpcomingPage(),
-      '/completed': (context) => const CompletedPage(),
-      '/company': (context) => const CompanyPage(),
-      '/profile': (context) => const ProfilePage(),
-      '/productivity': (context) => const ProductivityPage(),
-      '/home': (context) => const HomePage(),
-      '/explore': (context) => const ExplorePage(),
-      '/notifications': (context) => const NotificationPage(),
-      '/search': (context) => const SearchPage(),
-      '/createpost': (context) => const CreatePostPage(),
-      '/socialprofile': (context) => const SocialProfilePage(),
-    });
+    return MaterialApp(
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const LoginPage(),
+        '/signup': (context) => const SignupPage(),
+        '/inbox': (context) => const InboxPage(),
+        '/settings': (context) => const SettingsPage(),
+        '/addtask': (context) => const AddTaskPage(),
+        '/today': (context) => const TodayPage(),
+        '/upcoming': (context) => const UpcomingPage(),
+        '/completed': (context) => const CompletedPage(),
+        '/company': (context) => const CompanyPage(),
+        '/profile': (context) => const ProfilePage(),
+        '/productivity': (context) => const ProductivityPage(),
+        '/home': (context) => const HomePage(),
+        '/explore': (context) => const ExplorePage(),
+        '/notifications': (context) => const NotificationPage(),
+        '/search': (context) => const SearchPage(),
+        '/createpost': (context) => CreatePostDialog(),
+        '/socialprofile': (context) => const SocialProfilePage(),
+      },
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+    );
   }
 }

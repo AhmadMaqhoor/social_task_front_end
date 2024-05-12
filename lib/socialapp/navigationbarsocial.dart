@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:isd_project/socialapp/createpost.dart";
 
 class NavSideBar extends StatefulWidget {
   const NavSideBar({super.key});
@@ -64,7 +65,12 @@ class _NavSideBarState extends State<NavSideBar> {
             leading: const Icon(Icons.add_rounded),
             title: const Text('Create Post'),
             onTap: () {
-              Navigator.pushNamed(context, '/createpost');
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return CreatePostDialog();
+                },
+              );
             },
           ),
           ListTile(
