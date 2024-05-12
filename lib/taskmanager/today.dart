@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:isd_project/taskmanager/addtaskdialog.dart';
 import 'package:isd_project/taskmanager/navigationbar.dart';
 import 'package:isd_project/taskmanager/todayorganizationtask.dart';
 import 'package:isd_project/taskmanager/todaytasklist.dart'; // Import your TodayTasksScreen if it exists
@@ -19,13 +20,13 @@ class _TodayPageState extends State<TodayPage> {
       // Fetch and display today's tasks
       return TodayTasksScreen(); // Use your TodayTasksScreen widget here
     } else if (selectedItem == 'My Companies') {
-     return TodayOrganizationTasksScreen();
-      
+      return TodayOrganizationTasksScreen();
     } else {
       return Container(); // Fallback
     }
   }
 
+  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,7 +37,7 @@ class _TodayPageState extends State<TodayPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               IconButton(
-                icon: const Icon(Icons.menu),
+                icon: const Icon(Icons.hide_source),
                 onPressed: () {
                   _scaffoldKey.currentState?.openDrawer();
                 },
@@ -95,20 +96,6 @@ class _TodayPageState extends State<TodayPage> {
                         ),
                       ),
                     ),
-                    const Divider(
-                      color: Colors.black,
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/addtask');
-                          },
-                          icon: const Icon(Icons.add),
-                        ),
-                        const Text("Add Task"),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -116,6 +103,25 @@ class _TodayPageState extends State<TodayPage> {
           ),
           Expanded(
             child: _buildTaskList(_selectedItem),
+          ),
+          const Divider(
+            color: Colors.black,
+          ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AddTaskDialog();
+                    },
+                  );
+                },
+                icon: const Icon(Icons.add),
+              ),
+              const Text("Add Task"),
+            ],
           ),
         ],
       ),

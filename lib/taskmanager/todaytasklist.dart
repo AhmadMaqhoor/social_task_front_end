@@ -37,6 +37,77 @@ class _TodayTasksScreenState extends State<TodayTasksScreen> {
     }
   }
 
+  void updateTaskCompletion(int taskId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+
+    final response = await http.patch(
+      Uri.parse(
+          'http://127.0.0.1:8000/api/taskapp/update-task-completion/$taskId'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, bool>{'completed': true}),
+    );
+
+    if (response.statusCode == 200) {
+      // Task updated successfully
+      // Refresh task list
+      fetchTasks();
+    } else {
+      // Failed to update task
+      print('Failed to update task completion');
+    }
+  }
+
+  void deleteTask(int taskId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirmation"),
+          content: Text("Are you sure you want to delete this task?"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () async {
+                // Close the dialog
+                Navigator.of(context).pop();
+                // Proceed with task deletion
+                final response = await http.delete(
+                  Uri.parse(
+                      'http://127.0.0.1:8000/api/taskapp/remove-task/$taskId'),
+                  headers: <String, String>{
+                    'Authorization': 'Bearer $accessToken',
+                  },
+                );
+                if (response.statusCode == 200) {
+                  // Task deleted successfully
+                  // Refresh task list
+                  fetchTasks();
+                } else {
+                  // Failed to delete task
+                  print('Failed to delete task');
+                }
+              },
+              child: Text("Yes"),
+            ),
+            TextButton(
+              onPressed: () {
+                // Close the dialog
+                Navigator.of(context).pop();
+              },
+              child: Text("No"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void viewTaskDetails(int taskId) {
     // Navigate to task details screen using taskId
     // Implement your navigation logic here
@@ -45,15 +116,20 @@ class _TodayTasksScreenState extends State<TodayTasksScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Today\'s Tasks'),
-      ),
       body: ListView.builder(
         itemCount: tasks.length,
         itemBuilder: (context, index) {
           final task = tasks[index];
           return ListTile(
-            leading: Icon(Icons.circle_outlined),
+            leading: IconButton(
+              onPressed: () {
+                // Update task completion status
+                updateTaskCompletion(task['id']);
+              },
+              icon: task['completed']
+                  ? Icon(Icons.check_circle)
+                  : Icon(Icons.circle_outlined),
+            ),
             title: Text(task['title']),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -67,7 +143,8 @@ class _TodayTasksScreenState extends State<TodayTasksScreen> {
                 IconButton(
                   icon: Icon(Icons.delete),
                   onPressed: () {
-                    // Implement delete functionality
+                    // Show delete confirmation dialog
+                    deleteTask(task['id']);
                   },
                 ),
               ],

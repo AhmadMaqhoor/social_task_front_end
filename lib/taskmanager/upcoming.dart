@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:isd_project/taskmanager/addtaskdialog.dart';
 import 'package:isd_project/taskmanager/navigationbar.dart';
+import 'package:isd_project/taskmanager/upcommingorganizationtasklist.dart';
 import 'package:isd_project/taskmanager/upcommingtasklist.dart'; // Import your TodayTasksScreen if it exists
 import 'package:isd_project/taskmanager/calendar.dart';
 import 'package:intl/intl.dart';
@@ -22,16 +24,16 @@ class _UpcomingPageState extends State<UpcomingPage> {
     _selectedDate = DateTime.now();
   }
 
- Widget _buildTaskList(String selectedItem) {
-  if (selectedItem == 'My Tasks') {
-    // Fetch and display today's tasks
-    return UpcomingTasksScreen(selectedDate: _selectedDate);
-  } else if (selectedItem == 'My Companies') {
-    return Container();
-  } else {
-    return Container(); // Fallback
+  Widget _buildTaskList(String selectedItem) {
+    if (selectedItem == 'My Tasks') {
+      // Fetch and display today's tasks
+      return UpcomingTasksScreen(selectedDate: _selectedDate);
+    } else if (selectedItem == 'My Companies') {
+      return UpcomingOrganizationTasksScreen(selectedDate: _selectedDate);
+    } else {
+      return Container(); // Fallback
+    }
   }
-}
 
   void _handleDateSelected(DateTime selectedDate) {
     setState(() {
@@ -50,7 +52,7 @@ class _UpcomingPageState extends State<UpcomingPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               IconButton(
-                icon: const Icon(Icons.menu),
+                icon: const Icon(Icons.hide_source),
                 onPressed: () {
                   _scaffoldKey.currentState?.openDrawer();
                 },
@@ -115,20 +117,6 @@ class _UpcomingPageState extends State<UpcomingPage> {
                         ),
                       ),
                     ),
-                    const Divider(
-                      color: Colors.black,
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/addtask');
-                          },
-                          icon: const Icon(Icons.add),
-                        ),
-                        const Text("Add Task"),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -136,6 +124,25 @@ class _UpcomingPageState extends State<UpcomingPage> {
           ),
           Expanded(
             child: _buildTaskList(_selectedItem),
+          ),
+          const Divider(
+            color: Colors.black,
+          ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AddTaskDialog();
+                    },
+                  );
+                },
+                icon: const Icon(Icons.add),
+              ),
+              const Text("Add Task"),
+            ],
           ),
         ],
       ),

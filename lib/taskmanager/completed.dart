@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:isd_project/taskmanager/completedtasklist.dart';
 import 'package:isd_project/taskmanager/navigationbar.dart';
 
 class CompletedPage extends StatefulWidget {
@@ -6,6 +7,10 @@ class CompletedPage extends StatefulWidget {
 
   @override
   State<CompletedPage> createState() => _CompletedPageState();
+}
+
+Widget _buildCompletedTaskList() {
+  return CompletedTasksScreen();
 }
 
 class _CompletedPageState extends State<CompletedPage> {
@@ -31,10 +36,11 @@ class _CompletedPageState extends State<CompletedPage> {
             children: [
               Expanded(
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(30, 0, 0, 0),
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(30, 0, 0, 0),
                       child: Text(
                         'Completed',
                         style: TextStyle(
@@ -43,75 +49,14 @@ class _CompletedPageState extends State<CompletedPage> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 35,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 15,
-                        ),
-                        Icon(Icons.check_circle),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Text('task 1 is to do this thing'),
-                        Spacer(),
-                        Icon(Icons.visibility),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Icon(Icons.delete),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 15,
-                        ),
-                        Icon(Icons.check_circle),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Text('task 2 is to do this other thing which is'),
-                        Spacer(),
-                        Icon(Icons.visibility),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Icon(Icons.delete),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 15,
-                        ),
-                        Icon(Icons.check_circle),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Text(
-                            'task 3 is to do this other thing which is different from 1 and 2'),
-                        Spacer(),
-                        Icon(Icons.visibility),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Icon(Icons.delete),
-                      ],
-                    ),
                   ],
                 ),
-              )
+              ),
             ],
-          )
+          ),
+          Expanded(
+            child: _buildCompletedTaskList(),
+          ),
         ],
       ),
       drawer: const NavSideBar(),

@@ -5,10 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class TodayOrganizationTasksScreen extends StatefulWidget {
   @override
-  _TodayOrganizationTasksScreenState createState() => _TodayOrganizationTasksScreenState();
+  _TodayOrganizationTasksScreenState createState() =>
+      _TodayOrganizationTasksScreenState();
 }
 
-class _TodayOrganizationTasksScreenState extends State<TodayOrganizationTasksScreen> {
+class _TodayOrganizationTasksScreenState
+    extends State<TodayOrganizationTasksScreen> {
   List<dynamic> tasks = [];
 
   @override
@@ -17,12 +19,14 @@ class _TodayOrganizationTasksScreenState extends State<TodayOrganizationTasksScr
     fetchOrganizationTasks();
   }
 
+  bool iscompleted = false;
   Future<void> fetchOrganizationTasks() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/organizationstasks/today-assigned'),
+      Uri.parse(
+          'http://127.0.0.1:8000/api/taskapp/organizationstasks/today-assigned'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -37,6 +41,30 @@ class _TodayOrganizationTasksScreenState extends State<TodayOrganizationTasksScr
     }
   }
 
+  void updateTaskCompletion(int taskId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+
+    final response = await http.patch(
+      Uri.parse(
+          'http://127.0.0.1:8000/api/taskapp/organization-task/update-task-completion/$taskId'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, bool>{'completed': true}),
+    );
+
+    if (response.statusCode == 200) {
+      // Task updated successfully
+      // Refresh task list
+      fetchOrganizationTasks();
+    } else {
+      // Failed to update task
+      print('Failed to update task completion');
+    }
+  }
+
   void viewTaskDetails(int taskId) {
     // Navigate to task details screen using taskId
     // Implement your navigation logic here
@@ -45,15 +73,23 @@ class _TodayOrganizationTasksScreenState extends State<TodayOrganizationTasksScr
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Today\'s Organization Tasks'),
-      ),
       body: ListView.builder(
         itemCount: tasks.length,
         itemBuilder: (context, index) {
           final task = tasks[index];
           return ListTile(
-            leading: Icon(Icons.circle_outlined),
+            leading: IconButton(
+              onPressed: () {
+                // Update task completion status
+                updateTaskCompletion(task['id']);
+                setState(() {
+                  iscompleted = !iscompleted;
+                });
+              },
+              icon: task['completed']
+                  ? Icon(Icons.check_circle)
+                  : Icon(Icons.circle_outlined),
+            ),
             title: Text(task['title']),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -62,12 +98,6 @@ class _TodayOrganizationTasksScreenState extends State<TodayOrganizationTasksScr
                   icon: Icon(Icons.visibility),
                   onPressed: () {
                     viewTaskDetails(task['id']);
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () {
-                    // Implement delete functionality
                   },
                 ),
               ],

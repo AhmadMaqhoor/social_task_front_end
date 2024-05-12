@@ -1,68 +1,40 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class UpcomingTasksScreen extends StatefulWidget {
-  final DateTime selectedDate;
-
-  const UpcomingTasksScreen({
-    required this.selectedDate,
-  });
-
+class CompletedTasksScreen extends StatefulWidget {
   @override
-  _UpcomingTasksScreenState createState() => _UpcomingTasksScreenState();
+  _CompletedTasksScreenState createState() => _CompletedTasksScreenState();
 }
 
-class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
+class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
   List<dynamic> tasks = [];
-
-  @override
-  void didUpdateWidget(covariant UpcomingTasksScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.selectedDate != oldWidget) {
-      fetchUpcomingTasks();
-    }
-  }
-
-  bool iscompleted = false;
 
   @override
   void initState() {
     super.initState();
-    fetchUpcomingTasks();
+    fetchTasks();
   }
 
-  Future<void> fetchUpcomingTasks() async {
+  Future<void> fetchTasks() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String accessToken = prefs.getString('accessToken') ?? '';
-    final formattedDueDate =
-        DateFormat('yyyy-MM-dd').format(widget.selectedDate);
 
-    final response = await http.post(
-      Uri.parse(
-          'http://127.0.0.1:8000/api/taskapp/tasks-for-upcoming?_method=GET'),
+    final response = await http.get(
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/completed-tasks'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
-      },
-      body: {
-        'due_date': formattedDueDate,
       },
     );
 
     if (response.statusCode == 200) {
       setState(() {
-        tasks = jsonDecode(response.body)['tasks_for_selected_date'];
+        tasks = jsonDecode(response.body)['completed_tasks'];
       });
     } else {
       print('Failed to load tasks');
     }
-  }
-
-  void viewTaskDetails(int taskId) {
-    // Navigate to task details screen using taskId
-    // Implement your navigation logic here
   }
 
   void updateTaskCompletion(int taskId) async {
@@ -76,13 +48,13 @@ class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
       },
-      body: jsonEncode(<String, bool>{'completed': true}),
+      body: jsonEncode(<String, bool>{'completed': false}),
     );
 
     if (response.statusCode == 200) {
       // Task updated successfully
       // Refresh task list
-      fetchUpcomingTasks();
+      fetchTasks();
     } else {
       // Failed to update task
       print('Failed to update task completion');
@@ -115,7 +87,7 @@ class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
                 if (response.statusCode == 200) {
                   // Task deleted successfully
                   // Refresh task list
-                  fetchUpcomingTasks();
+                  fetchTasks();
                 } else {
                   // Failed to delete task
                   print('Failed to delete task');
@@ -134,6 +106,11 @@ class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
         );
       },
     );
+  }
+
+  void viewTaskDetails(int taskId) {
+    // Navigate to task details screen using taskId
+    // Implement your navigation logic here
   }
 
   @override
