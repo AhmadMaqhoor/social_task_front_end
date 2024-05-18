@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:isd_project/socialapp/navigationbarsocial.dart';
+import 'package:isd_project/socialapp/notificationslist.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -38,6 +39,9 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
           const Divider(
             color: Colors.black,
+          ),
+          Expanded(
+            child: NotificationList(),
           ),
         ],
       ),

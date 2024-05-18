@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:isd_project/socialapp/navigationbarsocial.dart';
-import 'package:isd_project/socialapp/postcard.dart';
+import 'package:isd_project/socialapp/cezarpostcard.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});
@@ -11,104 +14,74 @@ class ExplorePage extends StatefulWidget {
 
 class _ExploreState extends State<ExplorePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  List<dynamic> posts = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPosts();
+  }
+
+  Future<void> fetchPosts() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://127.0.0.1:8000/api/socialapp/show-all-posts'),
+        headers: <String, String>{
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          posts = data['posts'];
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load posts ');
+      }
+    } catch (e) {
+      print(e);
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      // body: Column(
-      //   children: [
-      //     Row(
-      //       mainAxisAlignment: MainAxisAlignment.start,
-      //       children: [
-      //         IconButton(
-      //           icon: const Icon(Icons.hide_source),
-      //           onPressed: () {
-      //             _scaffoldKey.currentState?.openDrawer();
-      //           },
-      //         ),
-      //       ],
-      //     ),
-      //     Row(
-      //       children: [
-      //         Icon(Icons.explore),
-      //         Text(
-      //           'Explore',
-      //           style: TextStyle(
-      //             fontWeight: FontWeight.bold,
-      //             fontSize: 30,
-      //           ),
-      //         )
-      //       ],
-      //     ),
-      //     SizedBox(
-      //       height: 10,
-      //     ),
-      //     Row(
-      //       mainAxisAlignment: MainAxisAlignment.center,
-      //       children: [
-      //         Text('all posts can be viewed here'),
-      //       ],
-      //     ),
-      //     SizedBox(
-      //       height: 20,
-      //     ),
-      //     Row(
-      //       children: [
-      //         Icon(Icons.account_circle),
-      //         Text('username1'),
-      //       ],
-      //     ),
-      //     Row(
-      //       children: [
-      //         Text('image here'),
-      //       ],
-      //     ),
-      //     Row(
-      //       children: [
-      //         Icon(Icons.heart_broken),
-      //         Text('123'),
-      //         Icon(Icons.comment),
-      //         Text('21'),
-      //       ],
-      //     ),
-      //     Row(
-      //       children: [
-      //         Text('Caption description here'),
-      //       ],
-      //     ),
-      //     SizedBox(
-      //       height: 30,
-      //     ),
-      //     Row(
-      //       children: [
-      //         Icon(Icons.account_circle),
-      //         Text('username167'),
-      //       ],
-      //     ),
-      //     SizedBox(
-      //       height: 30,
-      //     ),
-      //     Row(
-      //       children: [
-      //         Icon(Icons.account_circle),
-      //         Text('username367'),
-      //       ],
-      //     ),
-      //   ],
-      // ),
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
             _scaffoldKey.currentState?.openDrawer();
           },
-          icon: Icon(Icons.hide_source),
+          icon: Icon(Icons.menu),
         ),
         title: Text('Explore'),
       ),
       drawer: const NavSideBar(),
-      body: Builder(
-        builder: (context) => PostCard(),
-      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: posts.length,
+              itemBuilder: (context, index) {
+                final post = posts[index];
+                return PostCard(
+                  username: post['user_profile']['name'],
+                  userProfileImage: post['user_profile']['image'] ?? 'https://via.placeholder.com/150',
+                  postImage: post['image_path'] ?? 'https://via.placeholder.com/600',
+                  caption: post['caption'],
+                  likesCount: post['likes_count'],
+                  commentsCount: post['comment_count'],
+                  postId: post['id'],
+                );
+              },
+            ),
     );
   }
 }

@@ -1,16 +1,82 @@
-import "package:flutter/material.dart";
-import "package:isd_project/taskmanager/addcompanytask.dart";
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:isd_project/taskmanager/company.dart';
 import "package:isd_project/taskmanager/addtaskdialog.dart";
 import "package:isd_project/taskmanager/createcompany.dart";
 
 class NavSideBar extends StatefulWidget {
-  const NavSideBar({super.key});
+  const NavSideBar({Key? key}) : super(key: key);
 
   @override
   State<NavSideBar> createState() => _NavSideBarState();
 }
 
 class _NavSideBarState extends State<NavSideBar> {
+  bool _isExpanded = false;
+  List<String> organizationNames = []; // Initialize with empty list
+  List<int> organizationIds = []; // Initialize with empty list
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch organizations when the sidebar is initialized
+    fetchOrganizations();
+  }
+
+  Future<void> fetchOrganizations() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+
+    final response = await http.get(
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/get-organizations'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body)['organizations'];
+      setState(() {
+        organizationNames.clear(); // Clear previous list
+        organizationIds.clear(); // Clear previous list
+        for (final organization in data) {
+          organizationNames.add(organization['title']);
+          organizationIds.add(organization['id']);
+        }
+      });
+    } else {
+      throw Exception('Failed to load organizations');
+    }
+  }
+
+  Widget _buildCompanyList(BuildContext context) {
+    if (organizationNames.isEmpty) {
+      return CircularProgressIndicator(); // Show loading indicator while fetching
+    } else {
+      return Column(
+        children: List.generate(organizationNames.length, (index) {
+          return ListTile(
+            title: Text(organizationNames[index]),
+            onTap: () {
+              // Pass both the company name and ID when navigating to CompanyPage
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CompanyPage(
+                    companyName: organizationNames[index],
+                    companyId: organizationIds[index],
+                  ),
+                ),
+              );
+            },
+          );
+        }),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -100,12 +166,23 @@ class _NavSideBarState extends State<NavSideBar> {
           ListTile(
             leading: const Icon(Icons.join_full_rounded),
             onTap: () {
-              Navigator.pushNamed(context, '/company');
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
             },
             title: Row(
               children: [
                 Text('Company'),
                 const Spacer(),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _isExpanded = !_isExpanded;
+                    });
+                  },
+                  icon:
+                      Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
+                ),
                 IconButton(
                   onPressed: () {
                     showDialog(
@@ -120,6 +197,8 @@ class _NavSideBarState extends State<NavSideBar> {
               ],
             ),
           ),
+          if (_isExpanded)
+            _buildCompanyList(context), // Show company list if expanded
           const SizedBox(
             height: 180,
           ),

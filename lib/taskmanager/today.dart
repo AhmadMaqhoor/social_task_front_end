@@ -27,7 +27,6 @@ class _TodayPageState extends State<TodayPage> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,

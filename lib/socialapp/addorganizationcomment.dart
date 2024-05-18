@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AddCommentDialog extends StatefulWidget {
+class AddOrganizationCommentDialog extends StatefulWidget {
   final int postId;
 
-  const AddCommentDialog({Key? key, required this.postId}) : super(key: key);
+  const AddOrganizationCommentDialog({Key? key, required this.postId}) : super(key: key);
 
   @override
   _AddCommentDialogState createState() => _AddCommentDialogState();
 }
 
-class _AddCommentDialogState extends State<AddCommentDialog> {
+class _AddCommentDialogState extends State<AddOrganizationCommentDialog> {
   final TextEditingController _commentController = TextEditingController();
 
   Future<void> _addComment() async {
@@ -20,7 +20,7 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/socialapp/post/${widget.postId}/create-comment'),
+      Uri.parse('http://127.0.0.1:8000/api/socialapp/organization-post/${widget.postId}/create-comment'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',

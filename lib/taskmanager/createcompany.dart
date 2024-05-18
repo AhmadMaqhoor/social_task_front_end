@@ -1,4 +1,10 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateCompany extends StatefulWidget {
   const CreateCompany({super.key});
@@ -8,78 +14,175 @@ class CreateCompany extends StatefulWidget {
 }
 
 class _CreateCompanyState extends State<CreateCompany> {
+  String _title = '';
+  String _description = '';
 
-final TextEditingController _companyNameController = TextEditingController();
-final TextEditingController _inviteEmailController = TextEditingController();
+  Uint8List? _imageBytes;
+  String? _imageName;
 
-
-   void _createCompany() {
-    // Get the entered values from the text fields
-    final companyName = _companyNameController.text;
-    final inviteEmail = _inviteEmailController.text;
-
-    // Process the form data, e.g., create the company and invite members
-    // Here, we simply print the entered values
-    print('Company Name: $companyName');
-    print('Invite Members by Email: $inviteEmail');
-
-    // Clear the text fields after processing
-    _companyNameController.clear();
-    _inviteEmailController.clear();
+  @override
+  void initState() {
+    super.initState();
   }
 
-@override
-  void dispose() {
-    // Clean up the controllers when the widget is disposed
-    _companyNameController.dispose();
-    _inviteEmailController.dispose();
-    super.dispose();
-  }
+  Future<void> _createOrganization() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
 
+    if (_imageBytes == null) {
+      // Show an error message if the image is not selected
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select an image')),
+      );
+      return;
+    }
+
+    // Prepare the multipart request
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/add-organization'),
+    );
+
+    request.headers.addAll(<String, String>{
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'multipart/form-data',
+    });
+
+    // Attach the image file
+    request.files.add(http.MultipartFile.fromBytes(
+      'image',
+      _imageBytes!,
+      filename: _imageName,
+    ));
+
+    // Add other form fields
+    request.fields['title'] = _title;
+    request.fields['description'] = _description;
+
+    // Debugging: Print the request details
+    print('Request Headers: ${request.headers}');
+    print('Request Fields: ${request.fields}');
+    print('Request Files: ${request.files}');
+
+    // Send the request
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      // Handle success response
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Company created successfully')),
+      );
+      Navigator.pop(context);
+    } else {
+      // Handle error response
+      final responseBody = await response.stream.bytesToString();
+      print('Failed to create post: ${response.statusCode}');
+      print('Response Body: $responseBody');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create post: $responseBody')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-          title: Text('Create Company'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _companyNameController,
-                decoration: InputDecoration(
-                  labelText: 'Company Name',
-                ),
-              ),
-              SizedBox(height: 20),
-              TextField(
-                controller: _inviteEmailController,
-                decoration: InputDecoration(
-                  labelText: 'Invite Members by Email',
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel'),
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      elevation: 0.0,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Create Company',
+              style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
             ),
-            ElevatedButton(
-              onPressed: () {
-                // Process form data, e.g., create the company and invite members
-                _createCompany();
-                Navigator.pop(context);
+            SizedBox(height: 16.0),
+            GestureDetector(
+              onTap: () {
+                _showImagePicker(context);
               },
+              child: Container(
+                width: 150,
+                height: 150.0,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(8.0),
+                  image: _imageBytes != null
+                      ? DecorationImage(
+                          image: MemoryImage(_imageBytes!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child:
+                    _imageBytes == null ? Icon(Icons.upload, size: 30.0) : null,
+              ),
+            ),
+            SizedBox(height: 8.0),
+            Text(
+              'Title',
+              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+            ),
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Write a title...',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: null,
+              onChanged: (value) {
+                setState(() {
+                  _title = value;
+                });
+              },
+            ),
+            SizedBox(height: 16.0),
+            Text(
+              'Description',
+              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8.0),
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Write a description...',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: null,
+              onChanged: (value) {
+                setState(() {
+                  _description = value;
+                });
+              },
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: _createOrganization,
               child: Text('Create'),
             ),
           ],
-        );
-      }
+        ),
+      ),
+    );
   }
 
+  Future<void> _showImagePicker(BuildContext context) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+      );
 
- 
-
-  
+      if (result != null && result.files.isNotEmpty) {
+        setState(() {
+          _imageBytes = result.files.single.bytes;
+          _imageName = result.files.single.name;
+        });
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+    }
+  }
+}

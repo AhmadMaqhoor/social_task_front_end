@@ -3,12 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class TodayTasksScreen extends StatefulWidget {
+class AdminListingCompletedTaskScreen extends StatefulWidget {
+  final int companyId;
+
+  const AdminListingCompletedTaskScreen({Key? key, required this.companyId})
+      : super(key: key);
+
   @override
-  _TodayTasksScreenState createState() => _TodayTasksScreenState();
+  _AdminListingCompletedTaskScreen createState() =>
+      _AdminListingCompletedTaskScreen();
 }
 
-class _TodayTasksScreenState extends State<TodayTasksScreen> {
+class _AdminListingCompletedTaskScreen
+    extends State<AdminListingCompletedTaskScreen> {
   List<dynamic> tasks = [];
 
   @override
@@ -22,7 +29,8 @@ class _TodayTasksScreenState extends State<TodayTasksScreen> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/tasks-for-today'),
+      Uri.parse(
+          'http://127.0.0.1:8000/api/taskapp/organizationstasks/${widget.companyId}/admin/assigned-tasks/completed-tasks'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -30,7 +38,7 @@ class _TodayTasksScreenState extends State<TodayTasksScreen> {
 
     if (response.statusCode == 200) {
       setState(() {
-        tasks = jsonDecode(response.body)['tasks_for_today'];
+        tasks = jsonDecode(response.body)['assigned_tasks'];
       });
     } else {
       print('Failed to load tasks');
@@ -43,12 +51,12 @@ class _TodayTasksScreenState extends State<TodayTasksScreen> {
 
     final response = await http.put(
       Uri.parse(
-          'http://127.0.0.1:8000/api/taskapp/update-task-completion/$taskId'),
+          'http://127.0.0.1:8000/api/taskapp/organization-task/approve-task-completion/$taskId'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
       },
-      body: jsonEncode(<String, bool>{'completed': true}),
+      body: jsonEncode(<String, bool>{'approve': true}),
     );
 
     if (response.statusCode == 200) {
@@ -79,7 +87,7 @@ class _TodayTasksScreenState extends State<TodayTasksScreen> {
                 // Proceed with task deletion
                 final response = await http.delete(
                   Uri.parse(
-                      'http://127.0.0.1:8000/api/taskapp/remove-task/$taskId'),
+                      'http://127.0.0.1:8000/api/taskapp/organization-task/admin/remove-task-by/$taskId'),
                   headers: <String, String>{
                     'Authorization': 'Bearer $accessToken',
                   },
@@ -126,7 +134,7 @@ class _TodayTasksScreenState extends State<TodayTasksScreen> {
                 // Update task completion status
                 updateTaskCompletion(task['id']);
               },
-              icon: task['completed']
+              icon: task['approve']
                   ? Icon(Icons.check_circle)
                   : Icon(Icons.circle_outlined),
             ),

@@ -27,7 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/profile'),
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/profile?_method=GET'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -151,16 +151,22 @@ class _ProfilePageState extends State<ProfilePage> {
                 _imageUrl != null
                     ? CircleAvatar(
                         radius: 50,
-                        backgroundImage: NetworkImage(_imageUrl!),
+                        child: ClipOval(
+                          child: Image(
+                            image: NetworkImage(_imageUrl!),
+                            fit: BoxFit
+                                .cover, // Adjust according to your preference
+                          ),
+                        ),
                       )
-                    : CircularProgressIndicator(),
-                SizedBox(width: 16),
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () {
-                    // Logic to change or remove profile picture
-                  },
-                ),
+                    : Container(
+                        // Placeholder widget if image URL is null or invalid
+                        width: 100,
+                        height: 100,
+                        color: Colors.grey, // Placeholder color
+                        child: Icon(Icons.image,
+                            color: Colors.white), // Placeholder icon or text
+                      ),
               ],
             ),
             SizedBox(height: 16),

@@ -35,7 +35,6 @@ class MyApp extends StatelessWidget {
       '/today': (context) => const TodayPage(),
       '/upcoming': (context) => const UpcomingPage(),
       '/completed': (context) => const CompletedPage(),
-      '/company': (context) => const CompanyPage(),
       '/profile': (context) => ProfilePage(),
       '/productivity': (context) => const ProductivityPage(),
       '/home': (context) => const HomePage(),
@@ -43,7 +42,7 @@ class MyApp extends StatelessWidget {
       '/notifications': (context) => const NotificationPage(),
       '/search': (context) => const SearchPage(),
       '/createpost': (context) => CreatePostDialog(),
-      '/socialprofile': (context) => const SocialProfilePage(),
+      '/socialprofile': (context) => SocialProfilePage(),
     });
   }
 }

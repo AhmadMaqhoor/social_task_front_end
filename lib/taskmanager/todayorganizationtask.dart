@@ -45,7 +45,7 @@ class _TodayOrganizationTasksScreenState
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String accessToken = prefs.getString('accessToken') ?? '';
 
-    final response = await http.patch(
+    final response = await http.put(
       Uri.parse(
           'http://127.0.0.1:8000/api/taskapp/organization-task/update-task-completion/$taskId'),
       headers: <String, String>{

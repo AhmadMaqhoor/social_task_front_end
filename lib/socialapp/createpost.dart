@@ -1,7 +1,10 @@
-import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreatePostDialog extends StatefulWidget {
   @override
@@ -9,10 +12,107 @@ class CreatePostDialog extends StatefulWidget {
 }
 
 class _CreatePostDialogState extends State<CreatePostDialog> {
-  List<String> _audienceOptions = ['Public', 'Company 1', 'Company 2'];
-  List<String> _selectedAudience = ['Public'];
+  List<Map<String, dynamic>> _organizations = [];
+  List<String> _selectedAudience = [];
   String _description = '';
-  File? _image;
+  Uint8List? _imageBytes;
+  String? _imageName;
+  bool _showCompanies = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOrganizations();
+  }
+
+  Future<void> _fetchOrganizations() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+
+    final response = await http.get(
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/get-organizations'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      setState(() {
+        _organizations = List<Map<String, dynamic>>.from(data['organizations']);
+      });
+    } else {
+      // Handle error response
+      print('Failed to load organizations: ${response.statusCode}');
+    }
+  }
+
+  Future<void> _createPost() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+
+    if (_imageBytes == null) {
+      // Show an error message if the image is not selected
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select an image')),
+      );
+      return;
+    }
+
+    // Prepare the multipart request
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('http://127.0.0.1:8000/api/socialapp/create-post'),
+    );
+
+    request.headers.addAll(<String, String>{
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'multipart/form-data',
+    });
+
+    // Attach the image file
+    request.files.add(http.MultipartFile.fromBytes(
+      'image_path',
+      _imageBytes!,
+      filename: _imageName,
+    ));
+
+    // Add other form fields
+    request.fields['caption'] = _description;
+    request.fields['audience'] = _showCompanies ? "1" : "0";
+
+    // Add organization_ids as separate fields
+    if (_showCompanies) {
+      for (var id in _selectedAudience) {
+        request.fields['organization_ids[]'] = id;
+      }
+    }
+
+    // Debugging: Print the request details
+    print('Request Headers: ${request.headers}');
+    print('Request Fields: ${request.fields}');
+    print('Request Files: ${request.files}');
+
+    // Send the request
+    final response = await request.send();
+
+    if (response.statusCode == 201) {
+      // Handle success response
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Post created successfully')),
+      );
+      Navigator.pop(context);
+    } else {
+      // Handle error response
+      final responseBody = await response.stream.bytesToString();
+      print('Failed to create post: ${response.statusCode}');
+      print('Response Body: $responseBody');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create post: $responseBody')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +141,15 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(8.0),
-                  image: _image != null
+                  image: _imageBytes != null
                       ? DecorationImage(
-                          image: FileImage(_image!),
+                          image: MemoryImage(_imageBytes!),
                           fit: BoxFit.cover,
                         )
                       : null,
                 ),
-                child: _image == null ? Icon(Icons.upload, size: 30.0) : null,
+                child:
+                    _imageBytes == null ? Icon(Icons.upload, size: 30.0) : null,
               ),
             ),
             SizedBox(height: 16.0),
@@ -70,20 +171,34 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
               },
             ),
             SizedBox(height: 16.0),
-            Text(
-              'Audience',
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                Checkbox(
+                  value: _showCompanies,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _showCompanies = value ?? false;
+                      if (!_showCompanies) {
+                        _selectedAudience.clear();
+                      }
+                    });
+                  },
+                ),
+                Text(
+                  'Audience',
+                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
             SizedBox(height: 8.0),
-            Column(
-              children: _buildAudienceOptions(),
-            ),
-            SizedBox(height: 16.0),
+            if (_showCompanies) ...[
+              Column(
+                children: _buildCompanyOptions(),
+              ),
+              SizedBox(height: 16.0),
+            ],
             ElevatedButton(
-              onPressed: () {
-                // Implement post creation functionality
-                Navigator.pop(context);
-              },
+              onPressed: _createPost,
               child: Text('Post'),
             ),
           ],
@@ -100,30 +215,27 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
       );
 
       if (result != null && result.files.isNotEmpty) {
-        final bytes = result.files.single.bytes;
-        if (bytes != null) {
-          setState(() {
-            _image = File.fromRawPath(bytes);
-          });
-        }
+        setState(() {
+          _imageBytes = result.files.single.bytes;
+          _imageName = result.files.single.name;
+        });
       }
     } catch (e) {
       print('Error picking image: $e');
     }
   }
 
-  List<Widget> _buildAudienceOptions() {
-    return _audienceOptions.map((audience) {
-      bool isSelected = _selectedAudience.contains(audience);
+  List<Widget> _buildCompanyOptions() {
+    return _organizations.map((org) {
       return CheckboxListTile(
-        title: Text(audience),
-        value: isSelected,
+        title: Text(org['title']),
+        value: _selectedAudience.contains(org['id'].toString()),
         onChanged: (bool? value) {
           setState(() {
-            if (value != null && value) {
-              _selectedAudience.add(audience);
+            if (value ?? false) {
+              _selectedAudience.add(org['id'].toString());
             } else {
-              _selectedAudience.remove(audience);
+              _selectedAudience.remove(org['id'].toString());
             }
           });
         },
