@@ -6,7 +6,7 @@ import 'package:isd_project/socialapp/comment.dart';
 import 'package:isd_project/socialapp/addcomment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PostCard extends StatefulWidget {
+class ProfilePostCard extends StatefulWidget {
   final String username;
   final String userProfileImage;
   final String postImage;
@@ -14,8 +14,9 @@ class PostCard extends StatefulWidget {
   final int likesCount;
   final int commentsCount;
   final int postId;
+  final Function fetchPosts; // Add this parameter
 
-  const PostCard({
+  const ProfilePostCard({
     Key? key,
     required this.username,
     required this.userProfileImage,
@@ -24,13 +25,14 @@ class PostCard extends StatefulWidget {
     required this.likesCount,
     required this.commentsCount,
     required this.postId,
+    required this.fetchPosts, // Add this parameter
   }) : super(key: key);
 
   @override
-  _PostCardState createState() => _PostCardState();
+  _ProfilePostCardState createState() => _ProfilePostCardState();
 }
 
-class _PostCardState extends State<PostCard> {
+class _ProfilePostCardState extends State<ProfilePostCard> {
   late bool _isLiked = false;
   late int _likesCount;
   List<dynamic> comments = [];
@@ -97,7 +99,6 @@ class _PostCardState extends State<PostCard> {
     }
   }
 
-
   Future<void> fetchComments() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String accessToken = prefs.getString('accessToken') ?? '';
@@ -119,7 +120,46 @@ class _PostCardState extends State<PostCard> {
     }
   }
 
-  
+  void deletePost(int postId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirmation"),
+          content: Text("Are you sure you want to delete this post?"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final response = await http.delete(
+                  Uri.parse(
+                      'http://127.0.0.1:8000/api/socialapp/remove-post-by/$postId'),
+                  headers: <String, String>{
+                    'Authorization': 'Bearer $accessToken',
+                  },
+                );
+                if (response.statusCode == 200) {
+                  widget.fetchPosts(); // Call fetchPosts after deletion
+                } else {
+                  print('Failed to delete post');
+                }
+              },
+              child: Text("Yes"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("No"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,32 +167,20 @@ class _PostCardState extends State<PostCard> {
       padding: EdgeInsets.symmetric(vertical: 10),
       child: Column(
         children: [
-          // Profile picture and username
+          // Delete icon to the right
           Container(
             padding: EdgeInsets.symmetric(vertical: 4, horizontal: 16)
                 .copyWith(right: 0),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                CircleAvatar(
-                  radius: 16,
-                  backgroundImage: NetworkImage(widget.userProfileImage),
+                // Delete icon
+                IconButton(
+                  onPressed: () {
+                    deletePost(widget.postId); // Activate delete function
+                  },
+                  icon: Icon(Icons.delete),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          widget.username,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                
               ],
             ),
           ),
@@ -176,29 +204,31 @@ class _PostCardState extends State<PostCard> {
                 ),
               ),
               IconButton(
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddCommentDialog(
-          postId: widget.postId,
-        ),
-      ),
-    );
-  },
-  icon: const Icon(Icons.comment),
-),
-
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddCommentDialog(
+                        postId: widget.postId,
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.comment),
+              ),
               IconButton(onPressed: () {}, icon: const Icon(Icons.share)),
               Expanded(
-                  child: Align(
-                alignment: Alignment.bottomRight,
-                child: IconButton(
-                    onPressed: () {}, icon: const Icon(Icons.bookmark)),
-              ))
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.bookmark),
+                  ),
+                ),
+              ),
             ],
           ),
-          // description and nb of comments
+          // Description and number of comments
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
@@ -286,7 +316,7 @@ class _PostCardState extends State<PostCard> {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

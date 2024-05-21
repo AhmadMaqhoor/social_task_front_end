@@ -108,9 +108,15 @@ class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
     );
   }
 
-  void viewTaskDetails(int taskId) {
-    // Navigate to task details screen using taskId
-    // Implement your navigation logic here
+  void viewTaskDetails(dynamic task) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return TaskDetailsDialog(
+          task: task,
+        );
+      },
+    );
   }
 
   @override
@@ -137,7 +143,7 @@ class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
                 IconButton(
                   icon: Icon(Icons.visibility),
                   onPressed: () {
-                    viewTaskDetails(task['id']);
+                    viewTaskDetails(task);
                   },
                 ),
                 IconButton(
@@ -152,6 +158,40 @@ class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
           );
         },
       ),
+    );
+  }
+}
+
+class TaskDetailsDialog extends StatelessWidget {
+  final dynamic task;
+
+  TaskDetailsDialog({required this.task});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Task Details'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Title: ${task['title']}'),
+          SizedBox(height: 8),
+          Text('Description: ${task['description']}'),
+          SizedBox(height: 16),
+          Text('Priority: ${task['priority']}'),
+          SizedBox(height: 8),
+          Text('Due Date: ${task['due_date']}'),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text('Close'),
+        ),
+      ],
     );
   }
 }

@@ -4,32 +4,32 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:isd_project/taskmanager/productivity.dart';
 
-class SetGoalsPagePerDay extends StatefulWidget {
+class SetGoalsPagePerWeek extends StatefulWidget {
   final String productivityId;
   final Function fetchProductivity;
-  const SetGoalsPagePerDay({required this.productivityId,required this.fetchProductivity,});
+  const SetGoalsPagePerWeek({required this.productivityId,required this.fetchProductivity,});
 
   @override
-  _SetGoalsPagePerDayState createState() => _SetGoalsPagePerDayState();
+  _SetGoalsPagePerWeekState createState() => _SetGoalsPagePerWeekState();
 }
 
-class _SetGoalsPagePerDayState extends State<SetGoalsPagePerDay> {
-  final TextEditingController _dailyGoalsController = TextEditingController();
+class _SetGoalsPagePerWeekState extends State<SetGoalsPagePerWeek> {
+  final TextEditingController _weeklyGoalsController = TextEditingController();
 
-  Future<void> updateDailyGoal() async {
-    final String dailyGoal = _dailyGoalsController.text.trim();
+  Future<void> updateWeeklyGoal() async {
+    final String weeklyGoal = _weeklyGoalsController.text.trim();
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.put(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/update-max-prodactivity-per-day/${widget.productivityId}'),
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/update-max-prodactivity-per-week/${widget.productivityId}'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',
       },
       body: jsonEncode(<String, String>{
-        'max_tasks_per_day': dailyGoal,
+        'max_tasks_per_week': weeklyGoal,
       }),
     );
 
@@ -71,17 +71,17 @@ class _SetGoalsPagePerDayState extends State<SetGoalsPagePerDay> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
-              controller: _dailyGoalsController,
+              controller: _weeklyGoalsController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'Daily Goals',
+                labelText: 'Weekly Goals',
                 hintText: 'Enter your daily goals',
               ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                updateDailyGoal();
+                updateWeeklyGoal();
               },
               child: Text('Save Goals'),
             ),
@@ -94,7 +94,7 @@ class _SetGoalsPagePerDayState extends State<SetGoalsPagePerDay> {
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed
-    _dailyGoalsController.dispose();
+    _weeklyGoalsController.dispose();
     super.dispose();
   }
 }

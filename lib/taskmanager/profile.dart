@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key});
@@ -15,6 +17,8 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _email;
   String? _imageUrl;
   int? _score;
+  Uint8List? _imageBytes;
+  String? _imageName;
 
   @override
   void initState() {
@@ -46,6 +50,59 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> _updateUserProfile() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+
+    var request = http.MultipartRequest(
+      'PUT',
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/update-profile'),
+    );
+    request.headers['Authorization'] = 'Bearer $accessToken';
+
+    if (_username != null) {
+      request.fields['name'] = _username!;
+    }
+    if (_email != null) {
+      request.fields['email'] = _email!;
+    }
+    if (_imageBytes != null) {
+      request.files.add(http.MultipartFile.fromBytes(
+        'image',
+        _imageBytes!,
+        filename: _imageName,
+      ));
+    }
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      print('User profile updated successfully');
+      fetchUserData();  // Refresh user data
+    } else {
+      print('Failed to update user profile');
+    }
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        setState(() {
+          _imageBytes = result.files.single.bytes;
+          _imageName = result.files.single.name;
+          _imageUrl = null;  // Clear the URL to show the new image
+        });
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+    }
+  }
+
   // Function for changing the username
   void _changeUsername(BuildContext context) {
     String newUsername = _username ?? '';
@@ -74,6 +131,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   _username = newUsername;
                 });
                 Navigator.of(context).pop();
+                _updateUserProfile();  // Update user profile on server
               },
               child: Text('Save'),
             ),
@@ -85,7 +143,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Function for changing the email
   void _changeEmail(BuildContext context) {
-    String newEmail = _email ?? ''; // Initialize with current email
+    String newEmail = _email ?? '';
 
     showDialog(
       context: context,
@@ -111,6 +169,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   _email = newEmail;
                 });
                 Navigator.of(context).pop();
+                _updateUserProfile();  // Update user profile on server
               },
               child: Text('Save'),
             ),
@@ -145,29 +204,24 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                _imageUrl != null
-                    ? CircleAvatar(
-                        radius: 50,
-                        child: ClipOval(
-                          child: Image(
-                            image: NetworkImage(_imageUrl!),
-                            fit: BoxFit
-                                .cover, // Adjust according to your preference
-                          ),
+            GestureDetector(
+              onTap: _pickImage,
+              child: _imageBytes != null
+                  ? CircleAvatar(
+                      radius: 50,
+                      backgroundImage: MemoryImage(_imageBytes!),
+                    )
+                  : _imageUrl != null
+                      ? CircleAvatar(
+                          radius: 50,
+                          backgroundImage: NetworkImage(_imageUrl!),
+                        )
+                      : Container(
+                          width: 100,
+                          height: 100,
+                          color: Colors.grey,
+                          child: Icon(Icons.image, color: Colors.white),
                         ),
-                      )
-                    : Container(
-                        // Placeholder widget if image URL is null or invalid
-                        width: 100,
-                        height: 100,
-                        color: Colors.grey, // Placeholder color
-                        child: Icon(Icons.image,
-                            color: Colors.white), // Placeholder icon or text
-                      ),
-              ],
             ),
             SizedBox(height: 16),
             Row(
@@ -192,7 +246,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 IconButton(
                   icon: Icon(Icons.edit),
                   onPressed: () {
-                    // Logic to change username
                     _changeUsername(context);
                   },
                 ),
@@ -220,12 +273,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 IconButton(
                   icon: Icon(Icons.edit),
                   onPressed: () {
-                    // Logic to change email
                     _changeEmail(context);
                   },
                 ),
               ],
-            )
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _updateUserProfile,
+              child: Text('Save Changes'),
+            ),
           ],
         ),
       ),

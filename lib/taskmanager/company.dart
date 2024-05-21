@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:isd_project/taskmanager/addcompanytask.dart';
+import 'package:isd_project/taskmanager/addtaskdiaglogasadmin.dart';
 import 'package:isd_project/taskmanager/adminlistingpendingtasklist.dart';
 import 'package:isd_project/taskmanager/adminlistingcompletedtask.dart';
 import 'package:isd_project/taskmanager/navigationbar.dart';
@@ -102,8 +102,9 @@ class _CompanyPageState extends State<CompanyPage> {
                     onPressed: () {
                       showDialog(
                         context: context,
-                        builder: (BuildContext context) {
-                          return AddCompanyTaskPage();
+                       builder: (BuildContext context) {
+                          return AddTaskDialogAsAdmin(
+                              companyId: widget.companyId);
                         },
                       );
                     },

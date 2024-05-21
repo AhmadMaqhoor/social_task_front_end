@@ -82,10 +82,10 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
     request.fields['caption'] = _description;
     request.fields['audience'] = _showCompanies ? "1" : "0";
 
-    // Add organization_ids as separate fields
+    // Add organization_ids as separate fields with indexed keys
     if (_showCompanies) {
-      for (var id in _selectedAudience) {
-        request.fields['organization_ids[]'] = id;
+      for (int i = 0; i < _selectedAudience.length; i++) {
+        request.fields['organization_ids[$i]'] = _selectedAudience[i];
       }
     }
 

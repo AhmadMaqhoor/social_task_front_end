@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:isd_project/taskmanager/navigationbar.dart';
+import 'package:isd_project/taskmanager/inboxtasklist.dart';
+import 'package:isd_project/taskmanager/invitationlist.dart';
 
 class InboxPage extends StatefulWidget {
   const InboxPage({super.key});
@@ -12,6 +12,8 @@ class InboxPage extends StatefulWidget {
 
 class _InboxPageState extends State<InboxPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  bool showTasks = true; // Initially show tasks
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,96 +31,76 @@ class _InboxPageState extends State<InboxPage> {
               ),
             ],
           ),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(30, 0, 0, 0),
-                      child: Text(
-                        'Inbox',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30,
-                        ),
-                      ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(30, 0, 0, 0),
+            child: Text(
+              'Inbox',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 30,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(30, 20, 30, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      minimumSize: const Size(40, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      )),
+                  onPressed: () {
+                    setState(() {
+                      showTasks = true;
+                    });
+                  },
+                  child: Text(
+                    'Tasks',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
                     ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 50.0),
-                      child: Text('Tasks received from company'),
-                    ),
-                    SizedBox(height: 20.0),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 15,
-                        ),
-                        Icon(Icons.circle_outlined),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Text('task 1 is to do this thing'),
-                        Spacer(),
-                        Icon(Icons.visibility),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Icon(Icons.delete),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 15,
-                        ),
-                        Icon(Icons.check_circle_outline),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Text('task 2 is to do this other thing which is'),
-                        Spacer(),
-                        Icon(Icons.visibility),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Icon(Icons.delete),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 15,
-                        ),
-                        Icon(Icons.check_circle),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Text(
-                            'task 3 is to do this other thing which is different from 1 and 2'),
-                        Spacer(),
-                        Icon(Icons.visibility),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Icon(Icons.delete),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
-              )
-            ],
-          )
+                SizedBox(width: 10),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      minimumSize: const Size(40, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      )),
+                  onPressed: () {
+                    setState(() {
+                      showTasks = false;
+                    });
+                  },
+                  child: Text(
+                    'Invites',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(
+            color: Colors.black,
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(30.0),
+              child: showTasks ? TasksList() : InvitesList(),
+            ),
+          ),
         ],
       ),
       drawer: const NavSideBar(),

@@ -21,12 +21,12 @@ class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
   @override
   void didUpdateWidget(covariant UpcomingTasksScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.selectedDate != oldWidget) {
+    if (widget.selectedDate != oldWidget.selectedDate) {
       fetchUpcomingTasks();
     }
   }
 
-  bool iscompleted = false;
+  bool isCompleted = false;
 
   @override
   void initState() {
@@ -60,11 +60,6 @@ class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
     }
   }
 
-  void viewTaskDetails(int taskId) {
-    // Navigate to task details screen using taskId
-    // Implement your navigation logic here
-  }
-
   void updateTaskCompletion(int taskId) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String accessToken = prefs.getString('accessToken') ?? '';
@@ -80,11 +75,8 @@ class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
     );
 
     if (response.statusCode == 200) {
-      // Task updated successfully
-      // Refresh task list
       fetchUpcomingTasks();
     } else {
-      // Failed to update task
       print('Failed to update task completion');
     }
   }
@@ -102,9 +94,7 @@ class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
           actions: <Widget>[
             TextButton(
               onPressed: () async {
-                // Close the dialog
                 Navigator.of(context).pop();
-                // Proceed with task deletion
                 final response = await http.delete(
                   Uri.parse(
                       'http://127.0.0.1:8000/api/taskapp/remove-task/$taskId'),
@@ -113,11 +103,8 @@ class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
                   },
                 );
                 if (response.statusCode == 200) {
-                  // Task deleted successfully
-                  // Refresh task list
                   fetchUpcomingTasks();
                 } else {
-                  // Failed to delete task
                   print('Failed to delete task');
                 }
               },
@@ -125,12 +112,25 @@ class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
             ),
             TextButton(
               onPressed: () {
-                // Close the dialog
                 Navigator.of(context).pop();
               },
               child: Text("No"),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void viewTaskDetails(dynamic task) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return TaskDetailsDialog(
+          task: task,
+          onSave: () {
+            fetchUpcomingTasks(); // Fetch tasks again after updating
+          },
         );
       },
     );
@@ -146,7 +146,6 @@ class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
           return ListTile(
             leading: IconButton(
               onPressed: () {
-                // Update task completion status
                 updateTaskCompletion(task['id']);
               },
               icon: task['completed']
@@ -160,13 +159,12 @@ class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
                 IconButton(
                   icon: Icon(Icons.visibility),
                   onPressed: () {
-                    viewTaskDetails(task['id']);
+                    viewTaskDetails(task);
                   },
                 ),
                 IconButton(
                   icon: Icon(Icons.delete),
                   onPressed: () {
-                    // Show delete confirmation dialog
                     deleteTask(task['id']);
                   },
                 ),
@@ -175,6 +173,100 @@ class _UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
           );
         },
       ),
+    );
+  }
+}
+
+class TaskDetailsDialog extends StatefulWidget {
+  final dynamic task;
+  final Function onSave;
+
+  TaskDetailsDialog({required this.task, required this.onSave});
+
+  @override
+  _TaskDetailsDialogState createState() => _TaskDetailsDialogState();
+}
+
+class _TaskDetailsDialogState extends State<TaskDetailsDialog> {
+  TextEditingController titleController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    titleController.text = widget.task['title'];
+    descriptionController.text = widget.task['description'];
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  void _saveEditedTask() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+
+    final response = await http.put(
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/update-task/${widget.task['id']}'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'title': titleController.text,
+        'description': descriptionController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      widget.onSave();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Task updated successfully')),
+      );
+      Navigator.pop(context);
+    } else {
+      print('Failed to update task');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Task Details'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: titleController,
+            decoration: InputDecoration(labelText: 'Title'),
+          ),
+          SizedBox(height: 8),
+          TextField(
+            controller: descriptionController,
+            decoration: InputDecoration(labelText: 'Description'),
+          ),
+          SizedBox(height: 16),
+          Text('Priority: ${widget.task['priority']}'),
+          SizedBox(height: 8),
+          Text('Due Date: ${widget.task['due_date']}'),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _saveEditedTask,
+          child: Text('Save'),
+        ),
+      ],
     );
   }
 }

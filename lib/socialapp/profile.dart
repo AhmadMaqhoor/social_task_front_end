@@ -1,81 +1,73 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:isd_project/socialapp/navigationbarsocial.dart';
+import 'package:http/http.dart' as http;
+import 'package:isd_project/socialapp/profilepostcard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SocialProfilePage extends StatefulWidget {
-  const SocialProfilePage({super.key});
-
   @override
-  State<SocialProfilePage> createState() => _ProfilePageState();
+  _SocialProfilePageState createState() => _SocialProfilePageState();
 }
 
-class _ProfilePageState extends State<SocialProfilePage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-
-  String _username = 'Username';
-  String _bio = 'Bio of the user goes here.';
-  AssetImage _profileImage = AssetImage('assets/profile_image.jpg');
+class _SocialProfilePageState extends State<SocialProfilePage> {
+  Map<String, dynamic> _userProfile = {};
+  List<dynamic> _posts = [];
+  bool _isLoading = true;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        leading: IconButton(
-            onPressed: () {
-              _scaffoldKey.currentState?.openDrawer();
-            },
-            icon: Icon(Icons.hide_source)),
-        title: Text('Profile'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: _editProfile,
-          ),
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () {
-              // Implement logout functionality
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildProfileInfo(),
-            Divider(),
-            _buildPosts(),
-          ],
-        ),
-      ),
-      drawer: NavSideBar(),
-    );
+  void initState() {
+    super.initState();
+    fetchPosts();
   }
 
-  Widget _buildProfileInfo() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+  Future<void> fetchPosts() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String accessToken = prefs.getString('accessToken') ?? '';
+
+    final response = await http.get(
+      Uri.parse('http://127.0.0.1:8000/api/socialapp/show-all-user-posts'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      setState(() {
+        _userProfile = responseData['user_profile'];
+        _posts = responseData['posts'];
+        _isLoading = false;
+      });
+    } else {
+      // Handle error
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Widget buildProfileInfo() {
+    return Container(
+      padding: EdgeInsets.all(16),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           CircleAvatar(
-            radius: 40.0,
-            backgroundImage: _profileImage,
+            radius: 50,
+            backgroundImage: NetworkImage(_userProfile['image']),
           ),
-          SizedBox(width: 16.0),
+          SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _username,
-                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                _userProfile['name'],
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 8.0),
-              Text(
-                _bio,
-                style: TextStyle(fontSize: 16.0),
-              ),
+              SizedBox(height: 8),
+              Text(_userProfile['email']),
+              SizedBox(height: 8),
+              Text('Score: ${_userProfile['score']}'),
             ],
           ),
         ],
@@ -83,74 +75,39 @@ class _ProfilePageState extends State<SocialProfilePage> {
     );
   }
 
-  Widget _buildPosts() {
-    // Replace this with your posts widget
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Posts',
-            style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 16.0),
-          // Your posts widgets go here
-          Placeholder(),
-        ],
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Profile'),
       ),
-    );
-  }
-
-  void _editProfile() {
-    TextEditingController usernameController =
-        TextEditingController(text: _username);
-    TextEditingController bioController = TextEditingController(text: _bio);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, setState) {
-            return AlertDialog(
-              title: Text('Edit Profile'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Column(
                 children: [
-                  TextField(
-                    controller: usernameController,
-                    decoration: InputDecoration(labelText: 'Username'),
-                  ),
-                  TextField(
-                    controller: bioController,
-                    decoration: InputDecoration(labelText: 'Bio'),
+                  buildProfileInfo(),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: _posts.length,
+                    itemBuilder: (context, index) {
+                      final post = _posts[index];
+                      return ProfilePostCard(
+                        username: _userProfile['name'],
+                        userProfileImage: _userProfile['image'],
+                        postImage: post['image_path'],
+                        caption: post['caption'],
+                        likesCount: post['likes_count'],
+                        commentsCount: post['comment_count'],
+                        postId: post['id'],
+                        fetchPosts: fetchPosts, // Pass fetchPosts as a parameter
+                      );
+                    },
                   ),
                 ],
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    // Cancel editing
-                    Navigator.pop(context);
-                  },
-                  child: Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      // Accept changes
-                      _username = usernameController.text;
-                      _bio = bioController.text;
-                    });
-                    Navigator.pop(context);
-                  },
-                  child: Text('Save'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+            ),
     );
   }
 }
