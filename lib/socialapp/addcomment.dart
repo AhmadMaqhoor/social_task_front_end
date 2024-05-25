@@ -20,7 +20,8 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/socialapp/post/${widget.postId}/create-comment'),
+      Uri.parse(
+          'http://192.168.0.105:8000/api/socialapp/post/${widget.postId}/create-comment'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',
@@ -39,24 +40,44 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Add Comment'),
+      title: const Text('Add Comment'),
       content: TextField(
         controller: _commentController,
-        decoration: InputDecoration(labelText: 'Enter your comment'),
+        decoration: const InputDecoration(labelText: 'Enter your comment'),
       ),
       actions: <Widget>[
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Cancel'),
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.black,
+            backgroundColor: Colors.blue,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 5, // Adds a shadow for a 3D effect
+          ),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: () async {
             await _addComment();
             Navigator.of(context).pop();
           },
-          child: Text('Add'),
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.black,
+            backgroundColor: Colors.blue,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 5, // Adds a shadow for a 3D effect
+          ),
+          child: const Text('Add'),
         ),
       ],
     );

@@ -7,16 +7,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UpcomingOrganizationTasksScreen extends StatefulWidget {
   final DateTime selectedDate;
 
-  const UpcomingOrganizationTasksScreen({
+  const UpcomingOrganizationTasksScreen({Key? key,
     required this.selectedDate,
-  });
+  }): super(key: key);
 
   @override
-  _UpcomingOrganizationTasksScreenState createState() =>
-      _UpcomingOrganizationTasksScreenState();
+  UpcomingOrganizationTasksScreenState createState() =>
+      UpcomingOrganizationTasksScreenState();
 }
 
-class _UpcomingOrganizationTasksScreenState
+class UpcomingOrganizationTasksScreenState
     extends State<UpcomingOrganizationTasksScreen> {
   List<dynamic> tasks = [];
 
@@ -44,7 +44,7 @@ class _UpcomingOrganizationTasksScreenState
 
     final response = await http.post(
       Uri.parse(
-          'http://127.0.0.1:8000/api/taskapp/organizationstasks/upcoming-assigned?_method=GET'),
+          'http://192.168.0.105:8000/api/taskapp/organizationstasks/upcoming-assigned?_method=GET'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -60,6 +60,10 @@ class _UpcomingOrganizationTasksScreenState
     } else {
       print('Failed to load tasks');
     }
+  }
+
+ void refetchTasks() {
+    fetchOrganizationUpcomingTasks();
   }
 
   void viewTaskDetails(dynamic task) {
@@ -79,7 +83,7 @@ class _UpcomingOrganizationTasksScreenState
 
     final response = await http.put(
       Uri.parse(
-          'http://127.0.0.1:8000/api/taskapp/organization-task/update-task-completion/$taskId'),
+          'http://192.168.0.105:8000/api/taskapp/organization-task/update-task-completion/$taskId'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',

@@ -13,6 +13,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+   
   List<dynamic> posts = [];
   bool isLoading = true;
   String _selectedItem = 'Companies'; // Default value
@@ -31,7 +32,7 @@ class _HomePageState extends State<HomePage> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/get-member-organizations'),
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/get-member-organizations'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -58,7 +59,7 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/api/socialapp/show-all-organization-posts-by/${organizationId == -1 ? '' : organizationId.toString()}'),
+        Uri.parse('http://192.168.0.105:8000/api/socialapp/show-all-organization-posts-by/${organizationId == -1 ? '' : organizationId.toString()}'),
         headers: <String, String>{
           'Authorization': 'Bearer $accessToken',
         },
@@ -89,9 +90,9 @@ class _HomePageState extends State<HomePage> {
           onPressed: () {
             _scaffoldKey.currentState?.openDrawer();
           },
-          icon: Icon(Icons.menu),
+          icon: Icon(Icons.hide_source),
         ),
-        title: Text('Explore'),
+        title: Text('Home'),
       ),
       drawer: const NavSideBar(),
       body: Column(
@@ -102,15 +103,16 @@ class _HomePageState extends State<HomePage> {
               child: DropdownButton<int>(
                 value: _selectedItem == 'Companies' ? -1 : int.parse(_selectedItem),
                 iconSize: 25,
-                iconEnabledColor: Colors.white,
+                iconEnabledColor: Colors.blue,
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 autofocus: true,
                 borderRadius: BorderRadius.circular(10),
-                focusColor: Colors.grey[500],
-                dropdownColor: Colors.grey[500],
+                iconDisabledColor: Colors.blue,
+                focusColor: Colors.blue,
+                dropdownColor: Colors.blue,
                 elevation: 0,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 16,
                 ),
                 onChanged: (int? newValue) {

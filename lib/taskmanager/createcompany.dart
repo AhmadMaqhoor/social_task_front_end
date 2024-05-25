@@ -32,7 +32,7 @@ class _CreateCompanyState extends State<CreateCompany> {
     if (_imageBytes == null) {
       // Show an error message if the image is not selected
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select an image')),
+        const SnackBar(content: Text('Please select an image')),
       );
       return;
     }
@@ -40,7 +40,7 @@ class _CreateCompanyState extends State<CreateCompany> {
     // Prepare the multipart request
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/add-organization'),
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/add-organization'),
     );
 
     request.headers.addAll(<String, String>{
@@ -69,8 +69,9 @@ class _CreateCompanyState extends State<CreateCompany> {
 
     if (response.statusCode == 200) {
       // Handle success response
+      Navigator.of(context).pop(); // Close the dialog and show message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Company created successfully')),
+        const SnackBar(content: Text('Company created successfully')),
       );
       Navigator.pop(context);
     } else {
@@ -92,15 +93,15 @@ class _CreateCompanyState extends State<CreateCompany> {
       ),
       elevation: 0.0,
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Create Company',
               style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             GestureDetector(
               onTap: () {
                 _showImagePicker(context);
@@ -122,13 +123,13 @@ class _CreateCompanyState extends State<CreateCompany> {
                     _imageBytes == null ? Icon(Icons.upload, size: 30.0) : null,
               ),
             ),
-            SizedBox(height: 8.0),
-            Text(
+            const SizedBox(height: 8.0),
+            const Text(
               'Title',
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
             ),
             TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Write a title...',
                 border: OutlineInputBorder(),
               ),
@@ -139,14 +140,14 @@ class _CreateCompanyState extends State<CreateCompany> {
                 });
               },
             ),
-            SizedBox(height: 16.0),
-            Text(
+            const SizedBox(height: 16.0),
+            const Text(
               'Description',
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8.0),
+            const SizedBox(height: 8.0),
             TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Write a description...',
                 border: OutlineInputBorder(),
               ),
@@ -157,10 +158,22 @@ class _CreateCompanyState extends State<CreateCompany> {
                 });
               },
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _createOrganization,
-              child: Text('Create'),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.black,
+                backgroundColor: Colors.blue,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                textStyle:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 5, // Adds a shadow for a 3D effect
+              ),
+              child: const Text('Create'),
             ),
           ],
         ),

@@ -21,8 +21,10 @@ class MemberItem {
 
 class AddTaskDialogAsAdmin extends StatefulWidget {
   final int companyId;
+  final VoidCallback onTaskCreated;
+  const AddTaskDialogAsAdmin({Key? key, required this.companyId, required this.onTaskCreated}) : super(key: key);
 
-  const AddTaskDialogAsAdmin({Key? key, required this.companyId}) : super(key: key);
+
 
   @override
   State<AddTaskDialogAsAdmin> createState() => _AddTaskDialogAsAdminState();
@@ -37,6 +39,7 @@ class _AddTaskDialogAsAdminState extends State<AddTaskDialogAsAdmin> {
   List<MemberItem> members = [];
   List<int> selectedMemberIds = [];
 
+
   Future<void> createTask() async {
     final String title = _titleController.text.trim();
     final String description = _descriptionController.text.trim();
@@ -48,7 +51,7 @@ class _AddTaskDialogAsAdminState extends State<AddTaskDialogAsAdmin> {
     print('Access Token: $accessToken');
 
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/organization-by-/${widget.companyId}/create-task'),
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/organization-by-/${widget.companyId}/create-task'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',
@@ -73,6 +76,7 @@ class _AddTaskDialogAsAdminState extends State<AddTaskDialogAsAdmin> {
           content: Text('Task created successfully'),
         ),
       );
+       widget.onTaskCreated();
     } else {
       // Display error message
       showDialog(
@@ -101,7 +105,7 @@ class _AddTaskDialogAsAdminState extends State<AddTaskDialogAsAdmin> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/api/taskapp/organizations/${widget.companyId}/members'),
+        Uri.parse('http://192.168.0.105:8000/api/taskapp/organizations/${widget.companyId}/members'),
         headers: <String, String>{
           'Authorization': 'Bearer $accessToken',
         },
@@ -201,7 +205,8 @@ class _AddTaskDialogAsAdminState extends State<AddTaskDialogAsAdmin> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      content: Container(
+       content: SingleChildScrollView(
+      child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -252,9 +257,9 @@ class _AddTaskDialogAsAdminState extends State<AddTaskDialogAsAdmin> {
               height: 20,
             ),
             Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Wrap(
+                alignment: WrapAlignment.spaceEvenly,
+                spacing: 10.0,
                 children: [
                   CustomDatePicker(
                     initialDate: DateTime.now(),
@@ -313,7 +318,7 @@ class _AddTaskDialogAsAdminState extends State<AddTaskDialogAsAdmin> {
               height: 10,
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(200, 0, 0, 15),
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
               child: ElevatedButton(
                   onPressed: createTask,
                   style: ElevatedButton.styleFrom(
@@ -333,7 +338,7 @@ class _AddTaskDialogAsAdminState extends State<AddTaskDialogAsAdmin> {
             )
           ],
         ),
-      ),
+      ),),
     );
   }
 }

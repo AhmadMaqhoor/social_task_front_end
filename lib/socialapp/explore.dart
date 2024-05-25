@@ -9,10 +9,10 @@ class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});
 
   @override
-  State<ExplorePage> createState() => _ExploreState();
+  State<ExplorePage> createState() => ExploreState();
 }
 
-class _ExploreState extends State<ExplorePage> {
+class ExploreState extends State<ExplorePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   List<dynamic> posts = [];
   bool isLoading = true;
@@ -29,7 +29,7 @@ class _ExploreState extends State<ExplorePage> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/api/socialapp/show-all-posts'),
+        Uri.parse('http://192.168.0.105:8000/api/socialapp/show-all-posts'),
         headers: <String, String>{
           'Authorization': 'Bearer $accessToken',
         },
@@ -51,6 +51,7 @@ class _ExploreState extends State<ExplorePage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,7 +61,7 @@ class _ExploreState extends State<ExplorePage> {
           onPressed: () {
             _scaffoldKey.currentState?.openDrawer();
           },
-          icon: Icon(Icons.menu),
+          icon: Icon(Icons.hide_source),
         ),
         title: Text('Explore'),
       ),

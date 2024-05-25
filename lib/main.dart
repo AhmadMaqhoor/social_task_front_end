@@ -26,7 +26,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(initialRoute: '/', routes: {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/', routes: {
       '/': (context) => const LoginPage(),
       '/signup': (context) => const SignupPage(),
       '/inbox': (context) => const InboxPage(),

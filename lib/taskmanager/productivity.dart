@@ -14,7 +14,7 @@ class ProductivityPage extends StatefulWidget {
 }
 
 class _ProductivityPageState extends State<ProductivityPage> {
-  String _selectedSection = 'Daily Goals'; // Default selected section
+  String _selectedSection = 'Daily'; // Default selected section
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   int minTasksPerDay = 0;
@@ -36,7 +36,7 @@ class _ProductivityPageState extends State<ProductivityPage> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/show-prodactivity'),
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/show-prodactivity'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -51,7 +51,8 @@ class _ProductivityPageState extends State<ProductivityPage> {
         maxTasksPerWeek = data['prodactivity']['max_tasks_per_week'];
         score = data['score'];
         rank = data['rank'];
-        productivityId = data['prodactivity']['id'].toString(); // Convert ID to string
+        productivityId =
+            data['prodactivity']['id'].toString(); // Convert ID to string
       });
     } else {
       print('Failed to load tasks');
@@ -63,31 +64,32 @@ class _ProductivityPageState extends State<ProductivityPage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Productivity'),
+        title: const Text('Productivity'),
         leading: IconButton(
           onPressed: () {
             _scaffoldKey.currentState?.openDrawer();
           },
-          icon: Icon(Icons.menu),
+          icon: const Icon(Icons.hide_source),
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              spacing: 10.0, // Space between buttons
               children: [
-                _buildSectionButton('Daily Goals'),
-                _buildSectionButton('Weekly Goals'),
+                _buildSectionButton('Daily'),
+                _buildSectionButton('Weekly'),
                 _buildSectionButton('Karma'),
               ],
             ),
-            SizedBox(height: 20),
-            if (_selectedSection == 'Daily Goals')
+            const SizedBox(height: 20),
+            if (_selectedSection == 'Daily')
               _buildGoalWidget(
-                title: 'Daily Goals',
+                title: 'Daily',
                 completed: minTasksPerDay,
                 total: maxTasksPerDay,
                 motivationText: 'Keep up the good work!',
@@ -95,9 +97,9 @@ class _ProductivityPageState extends State<ProductivityPage> {
                 icon: Icons.emoji_events, // Medal icon
                 isDaily: true, // Pass the flag to identify daily goals
               ),
-            if (_selectedSection == 'Weekly Goals')
+            if (_selectedSection == 'Weekly')
               _buildGoalWidget(
-                title: 'Weekly Goals',
+                title: 'Weekly',
                 completed: minTasksPerWeek,
                 total: maxTasksPerWeek,
                 motivationText: 'You can do it!',
@@ -124,6 +126,16 @@ class _ProductivityPageState extends State<ProductivityPage> {
           _selectedSection = section;
         });
       },
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.black,
+        backgroundColor: Colors.blue,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        textStyle: const TextStyle(fontSize: 16,),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 5, // Adds a shadow for a 3D effect
+      ),
       child: Text(section),
     );
   }
@@ -141,24 +153,24 @@ class _ProductivityPageState extends State<ProductivityPage> {
       children: [
         Text(
           title,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Icon(icon, size: 50), // Medal icon
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
           '$completed / $total Completed',
-          style: TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 16),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
           motivationText,
-          style: TextStyle(fontSize: 14),
+          style: const TextStyle(fontSize: 14),
         ),
-        Divider(),
+        const Divider(),
         Text(
           'Streak: $streak',
-          style: TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 16),
         ),
         TextButton(
           onPressed: () {
@@ -166,11 +178,20 @@ class _ProductivityPageState extends State<ProductivityPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => isDaily ? SetGoalsPagePerDay(productivityId: productivityId,fetchProductivity: fetchProductivity) : SetGoalsPagePerWeek(productivityId: productivityId,fetchProductivity: fetchProductivity),
+                builder: (context) => isDaily
+                    ? SetGoalsPagePerDay(
+                        productivityId: productivityId,
+                        fetchProductivity: fetchProductivity)
+                    : SetGoalsPagePerWeek(
+                        productivityId: productivityId,
+                        fetchProductivity: fetchProductivity),
               ),
             );
           },
-          child: Text('Edit Goals'),
+          child: const Text('Edit Goals',
+              style: TextStyle(
+                color: Colors.blue,
+              )),
         ),
       ],
     );
@@ -179,19 +200,19 @@ class _ProductivityPageState extends State<ProductivityPage> {
   Widget _buildKarmaWidget({required int points, required String rank}) {
     return Column(
       children: [
-        Text(
+        const Text(
           'Karma',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
           'Points: $points',
-          style: TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 16),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
           'Rank: $rank',
-          style: TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 16),
         ),
       ],
     );

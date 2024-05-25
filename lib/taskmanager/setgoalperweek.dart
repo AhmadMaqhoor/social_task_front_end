@@ -23,7 +23,7 @@ class _SetGoalsPagePerWeekState extends State<SetGoalsPagePerWeek> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.put(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/update-max-prodactivity-per-week/${widget.productivityId}'),
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/update-max-prodactivity-per-week/${widget.productivityId}'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',
@@ -83,6 +83,16 @@ class _SetGoalsPagePerWeekState extends State<SetGoalsPagePerWeek> {
               onPressed: () {
                 updateWeeklyGoal();
               },
+              style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.black,
+        backgroundColor: Colors.blue,
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 5, // Adds a shadow for a 3D effect
+      ),
               child: Text('Save Goals'),
             ),
           ],

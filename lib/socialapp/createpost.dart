@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CreatePostDialog extends StatefulWidget {
+  
   @override
   _CreatePostDialogState createState() => _CreatePostDialogState();
 }
@@ -30,7 +31,7 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/get-organizations'),
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/get-member-organizations'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
@@ -55,7 +56,7 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
     if (_imageBytes == null) {
       // Show an error message if the image is not selected
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select an image')),
+        const SnackBar(content: Text('Please select an image')),
       );
       return;
     }
@@ -63,7 +64,7 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
     // Prepare the multipart request
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://127.0.0.1:8000/api/socialapp/create-post'),
+      Uri.parse('http://192.168.0.105:8000/api/socialapp/create-post'),
     );
 
     request.headers.addAll(<String, String>{
@@ -97,10 +98,10 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
     // Send the request
     final response = await request.send();
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       // Handle success response
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Post created successfully')),
+        const SnackBar(content: Text('Post created successfully')),
       );
       Navigator.pop(context);
     } else {
@@ -122,15 +123,15 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
       ),
       elevation: 0.0,
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Create Post',
               style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             GestureDetector(
               onTap: () {
                 _showImagePicker(context);
@@ -149,17 +150,17 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                       : null,
                 ),
                 child:
-                    _imageBytes == null ? Icon(Icons.upload, size: 30.0) : null,
+                    _imageBytes == null ? const Icon(Icons.upload, size: 30.0) : null,
               ),
             ),
-            SizedBox(height: 16.0),
-            Text(
+            const SizedBox(height: 16.0),
+            const Text(
               'Description',
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8.0),
+            const SizedBox(height: 8.0),
             TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Write a description...',
                 border: OutlineInputBorder(),
               ),
@@ -170,7 +171,7 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                 });
               },
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Row(
               children: [
                 Checkbox(
@@ -184,22 +185,32 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                     });
                   },
                 ),
-                Text(
+                const Text(
                   'Audience',
                   style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
-            SizedBox(height: 8.0),
+            const SizedBox(height: 8.0),
             if (_showCompanies) ...[
               Column(
                 children: _buildCompanyOptions(),
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
             ],
             ElevatedButton(
               onPressed: _createPost,
-              child: Text('Post'),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.black,
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 5, // Adds a shadow for a 3D effect
+              ),
+              child: const Text('Post'),
             ),
           ],
         ),

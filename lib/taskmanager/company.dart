@@ -18,8 +18,14 @@ class CompanyPage extends StatefulWidget {
   State<CompanyPage> createState() => _CompanyPageState();
 }
 
+final GlobalKey<AdminListingPendingTaskScreenState> _tasksScreenKey = GlobalKey();
+
+void _refetchTasks() {
+  _tasksScreenKey.currentState?.refetchTasks();
+}
+
 Widget _buildPendingTaskList(int companyId) {
-  return AdminListingPendingTaskScreen(companyId: companyId);
+  return AdminListingPendingTaskScreen(companyId: companyId, key: _tasksScreenKey);
 }
 
 Widget _buildCompletedTaskList(int companyId) {
@@ -27,7 +33,7 @@ Widget _buildCompletedTaskList(int companyId) {
 }
 
 class _CompanyPageState extends State<CompanyPage> {
-  String _selectedSection = 'Tasks';
+  String _selectedSection = 'Assigned';
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
@@ -48,28 +54,23 @@ class _CompanyPageState extends State<CompanyPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Wrap(
+              alignment: WrapAlignment.spaceEvenly,
               children: [
-                _buildSectionButton('Assign Tasks'),
-                _buildSectionButton('Submitted Tasks'),
-                _buildSectionButton('Inbox'),
+                _buildSectionButton('Assigned'),
+                _buildSectionButton('Submitted'),
                 _buildSectionButton('Members'),
               ],
             ),
             SizedBox(height: 20),
-            if (_selectedSection == 'Assign Tasks')
+            if (_selectedSection == 'Assigned')
               Expanded(
                 child: _buildPendingTaskList(widget.companyId),
               ),
-            if (_selectedSection == 'Submitted Tasks')
+            if (_selectedSection == 'Submitted')
               Expanded(
                 child: _buildCompletedTaskList(widget.companyId),
               ),
-            if (_selectedSection == 'Inbox') ...[
-              // Replace with inbox widget
-              Text('Inbox Page'),
-            ],
             if (_selectedSection == 'Members') ...[
               // Use MemberList widget and pass companyId
               Expanded(
@@ -85,13 +86,13 @@ class _CompanyPageState extends State<CompanyPage> {
                     onPressed: () {
                       _showInviteMembersDialog(context);
                     },
-                    icon: Icon(Icons.add),
+                    icon: Icon(Icons.add, color: Colors.blue),
                   ),
                   Text('Invite Members'),
                 ],
               ),
             ],
-            if (_selectedSection == 'Assign Tasks') ...[
+            if (_selectedSection == 'Assigned') ...[
               SizedBox(height: 5),
               Divider(
                 color: Colors.black,
@@ -102,9 +103,9 @@ class _CompanyPageState extends State<CompanyPage> {
                     onPressed: () {
                       showDialog(
                         context: context,
-                       builder: (BuildContext context) {
+                        builder: (BuildContext context) {
                           return AddTaskDialogAsAdmin(
-                              companyId: widget.companyId);
+                              companyId: widget.companyId, onTaskCreated: _refetchTasks);
                         },
                       );
                     },
@@ -135,6 +136,16 @@ class _CompanyPageState extends State<CompanyPage> {
           _selectedSection = section;
         });
       },
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.black,
+        backgroundColor: Colors.blue,
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        textStyle: TextStyle(fontSize: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 5, // Adds a shadow for a 3D effect
+      ),
       child: Text(section),
     );
   }
@@ -152,8 +163,7 @@ class _CompanyPageState extends State<CompanyPage> {
 class InviteMembersDialog extends StatefulWidget {
   final int companyId;
 
-  const InviteMembersDialog({Key? key, required this.companyId})
-      : super(key: key);
+  const InviteMembersDialog({Key? key, required this.companyId}) : super(key: key);
 
   @override
   _InviteMembersDialogState createState() => _InviteMembersDialogState();
@@ -171,14 +181,12 @@ class _InviteMembersDialogState extends State<InviteMembersDialog> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.post(
-      Uri.parse(
-          'http://127.0.0.1:8000/api/taskapp/organizations/${widget.companyId}/send-invitation'),
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/organizations/${widget.companyId}/send-invitation'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',
       },
-      body: jsonEncode(
-          <String, String>{'recipient_email': email, 'message': message}),
+      body: jsonEncode(<String, String>{'recipient_email': email, 'message': message}),
     );
 
     if (response.statusCode == 200) {
@@ -201,6 +209,16 @@ class _InviteMembersDialogState extends State<InviteMembersDialog> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                  textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 5, // Adds a shadow for a 3D effect
+                ),
                 child: Text('OK'),
               ),
             ],
@@ -221,19 +239,21 @@ class _InviteMembersDialogState extends State<InviteMembersDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('Invite Member'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _emailController,
-            decoration: InputDecoration(hintText: "Enter member's email"),
-            keyboardType: TextInputType.emailAddress,
-          ),
-          TextField(
-            controller: _messageController,
-            decoration: InputDecoration(hintText: "Enter message"),
-          ),
-        ],
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(hintText: "Enter member's email"),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            TextField(
+              controller: _messageController,
+              decoration: InputDecoration(hintText: "Enter message"),
+            ),
+          ],
+        ),
       ),
       actions: <Widget>[
         TextButton(

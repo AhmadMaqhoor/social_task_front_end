@@ -4,11 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class TodayTasksScreen extends StatefulWidget {
+  const TodayTasksScreen({Key? key}) : super(key: key);
+
   @override
-  _TodayTasksScreenState createState() => _TodayTasksScreenState();
+  TodayTasksScreenState createState() => TodayTasksScreenState();
 }
 
-class _TodayTasksScreenState extends State<TodayTasksScreen> {
+class TodayTasksScreenState extends State<TodayTasksScreen> {
   List<dynamic> tasks = [];
 
   @override
@@ -22,7 +24,7 @@ class _TodayTasksScreenState extends State<TodayTasksScreen> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/tasks-for-today'),
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/tasks-for-today'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -37,13 +39,17 @@ class _TodayTasksScreenState extends State<TodayTasksScreen> {
     }
   }
 
+  void refetchTasks() {
+    fetchTasks();
+  }
+
   void updateTaskCompletion(int taskId) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.put(
       Uri.parse(
-          'http://127.0.0.1:8000/api/taskapp/update-task-completion/$taskId'),
+          'http://192.168.0.105:8000/api/taskapp/update-task-completion/$taskId'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
@@ -74,7 +80,7 @@ class _TodayTasksScreenState extends State<TodayTasksScreen> {
                 Navigator.of(context).pop();
                 final response = await http.delete(
                   Uri.parse(
-                      'http://127.0.0.1:8000/api/taskapp/remove-task/$taskId'),
+                      'http://192.168.0.105:8000/api/taskapp/remove-task/$taskId'),
                   headers: <String, String>{
                     'Authorization': 'Bearer $accessToken',
                   },
@@ -187,7 +193,8 @@ class _TaskDetailsDialogState extends State<TaskDetailsDialog> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.put(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/update-task/${widget.task['id']}'),
+      Uri.parse(
+          'http://192.168.0.105:8000/api/taskapp/update-task/${widget.task['id']}'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
@@ -247,4 +254,3 @@ class _TaskDetailsDialogState extends State<TaskDetailsDialog> {
     );
   }
 }
-

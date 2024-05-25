@@ -31,7 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/profile?_method=GET'),
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/profile?_method=GET'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -55,8 +55,8 @@ class _ProfilePageState extends State<ProfilePage> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     var request = http.MultipartRequest(
-      'PUT',
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/update-profile'),
+      'POST',
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/update-profile?_method=PUT'),
     );
     request.headers['Authorization'] = 'Bearer $accessToken';
 

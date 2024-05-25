@@ -48,7 +48,7 @@ class _OrganizationPostCardState extends State<OrganizationPostCard> {
 
     final response = await http.get(
       Uri.parse(
-          'http://127.0.0.1:8000/api/socialapp/like-organization-post-status-by/${widget.postId}'),
+          'http://192.168.0.105:8000/api/socialapp/like-organization-post-status-by/${widget.postId}'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -72,7 +72,7 @@ class _OrganizationPostCardState extends State<OrganizationPostCard> {
 
     final response = await http.put(
       Uri.parse(
-          'http://127.0.0.1:8000/api/socialapp/like-organization-post/${widget.postId}'),
+          'http://192.168.0.105:8000/api/socialapp/like-organization-post/${widget.postId}'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',
@@ -104,7 +104,7 @@ class _OrganizationPostCardState extends State<OrganizationPostCard> {
 
   final response = await http.get(
     Uri.parse(
-        'http://127.0.0.1:8000/api/socialapp/organization-comments/${widget.postId}'),
+        'http://192.168.0.105:8000/api/socialapp/organization-comments/${widget.postId}'),
     headers: <String, String>{
       'Authorization': 'Bearer $accessToken',
     },
@@ -182,25 +182,19 @@ class _OrganizationPostCardState extends State<OrganizationPostCard> {
               ),
               IconButton(
   onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddOrganizationCommentDialog(
-          postId: widget.postId,
-        ),
-      ),
-    );
-  },
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AddOrganizationCommentDialog(
+                        postId: widget.postId,
+                      );
+                    },
+                  );
+                },
   icon: const Icon(Icons.comment),
 ),
 
-              IconButton(onPressed: () {}, icon: const Icon(Icons.share)),
-              Expanded(
-                  child: Align(
-                alignment: Alignment.bottomRight,
-                child: IconButton(
-                    onPressed: () {}, icon: const Icon(Icons.bookmark)),
-              ))
+             
             ],
           ),
           // description and nb of comments
@@ -279,16 +273,7 @@ class _OrganizationPostCardState extends State<OrganizationPostCard> {
                     ),
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Text(
-                    'here is the date',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
+                
               ],
             ),
           )

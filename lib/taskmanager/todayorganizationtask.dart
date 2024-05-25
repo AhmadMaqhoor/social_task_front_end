@@ -4,12 +4,15 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TodayOrganizationTasksScreen extends StatefulWidget {
+
+  const TodayOrganizationTasksScreen({Key? key}) : super(key: key);
+
   @override
-  _TodayOrganizationTasksScreenState createState() =>
-      _TodayOrganizationTasksScreenState();
+  TodayOrganizationTasksScreenState createState() =>
+      TodayOrganizationTasksScreenState();
 }
 
-class _TodayOrganizationTasksScreenState
+class TodayOrganizationTasksScreenState
     extends State<TodayOrganizationTasksScreen> {
   List<dynamic> tasks = [];
 
@@ -26,7 +29,7 @@ class _TodayOrganizationTasksScreenState
 
     final response = await http.get(
       Uri.parse(
-          'http://127.0.0.1:8000/api/taskapp/organizationstasks/today-assigned'),
+          'http://192.168.0.105:8000/api/taskapp/organizationstasks/today-assigned'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -47,7 +50,7 @@ class _TodayOrganizationTasksScreenState
 
     final response = await http.put(
       Uri.parse(
-          'http://127.0.0.1:8000/api/taskapp/organization-task/update-task-completion/$taskId'),
+          'http://192.168.0.105:8000/api/taskapp/organization-task/update-task-completion/$taskId'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
@@ -65,6 +68,9 @@ class _TodayOrganizationTasksScreenState
     }
   }
 
+void refetchTasks() {
+    fetchOrganizationTasks();
+  }
  void viewTaskDetails(dynamic task) {
     showDialog(
       context: context,

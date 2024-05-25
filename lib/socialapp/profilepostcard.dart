@@ -50,7 +50,7 @@ class _ProfilePostCardState extends State<ProfilePostCard> {
 
     final response = await http.get(
       Uri.parse(
-          'http://127.0.0.1:8000/api/socialapp/like-post-status-by/${widget.postId}'),
+          'http://192.168.0.105:8000/api/socialapp/like-post-status-by/${widget.postId}'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -74,7 +74,7 @@ class _ProfilePostCardState extends State<ProfilePostCard> {
 
     final response = await http.put(
       Uri.parse(
-          'http://127.0.0.1:8000/api/socialapp/like-post/${widget.postId}'),
+          'http://192.168.0.105:8000/api/socialapp/like-post/${widget.postId}'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',
@@ -105,7 +105,7 @@ class _ProfilePostCardState extends State<ProfilePostCard> {
 
     final response = await http.get(
       Uri.parse(
-          'http://127.0.0.1:8000/api/socialapp/comments/${widget.postId}'),
+          'http://192.168.0.105:8000/api/socialapp/comments/${widget.postId}'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -136,7 +136,7 @@ class _ProfilePostCardState extends State<ProfilePostCard> {
                 Navigator.of(context).pop();
                 final response = await http.delete(
                   Uri.parse(
-                      'http://127.0.0.1:8000/api/socialapp/remove-post-by/$postId'),
+                      'http://192.168.0.105:8000/api/socialapp/remove-post-by/$postId'),
                   headers: <String, String>{
                     'Authorization': 'Bearer $accessToken',
                   },
@@ -216,16 +216,7 @@ class _ProfilePostCardState extends State<ProfilePostCard> {
                 },
                 icon: const Icon(Icons.comment),
               ),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.share)),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.bookmark),
-                  ),
-                ),
-              ),
+              
             ],
           ),
           // Description and number of comments
@@ -304,16 +295,7 @@ class _ProfilePostCardState extends State<ProfilePostCard> {
                     ),
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Text(
-                    'here is the date',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
+                
               ],
             ),
           ),

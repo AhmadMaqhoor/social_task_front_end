@@ -25,7 +25,7 @@ class _InvitesListState extends State<InvitesList> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/recieve-invitation-by-organization'),
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/recieve-invitation-by-organization'),
       headers: {
         'Authorization': 'Bearer $accessToken',
       },
@@ -50,7 +50,7 @@ class _InvitesListState extends State<InvitesList> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/invitation/$invitationId/respond'),
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/invitation/$invitationId/respond'),
       headers: {
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',

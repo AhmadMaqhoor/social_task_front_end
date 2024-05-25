@@ -14,16 +14,24 @@ class TodayPage extends StatefulWidget {
 class _TodayPageState extends State<TodayPage> {
   String _selectedItem = 'My Tasks';
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  final GlobalKey<TodayTasksScreenState> _tasksScreenKey = GlobalKey();
+    final GlobalKey< TodayOrganizationTasksScreenState> _tasksScreenKeyOrganization = GlobalKey();
+
 
   Widget _buildTaskList(String selectedItem) {
     if (selectedItem == 'My Tasks') {
       // Fetch and display today's tasks
-      return TodayTasksScreen(); // Use your TodayTasksScreen widget here
+      return TodayTasksScreen(key: _tasksScreenKey); // Use your TodayTasksScreen widget here
     } else if (selectedItem == 'My Companies') {
-      return TodayOrganizationTasksScreen();
+      return TodayOrganizationTasksScreen(key:_tasksScreenKeyOrganization);
     } else {
       return Container(); // Fallback
     }
+  }
+
+  void _refetchTasks() {
+    _tasksScreenKey.currentState?.refetchTasks();
+    _tasksScreenKeyOrganization.currentState?.refetchTasks();
   }
 
   @override
@@ -113,7 +121,7 @@ class _TodayPageState extends State<TodayPage> {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return AddTaskDialog();
+                      return AddTaskDialog(onTaskCreated: _refetchTasks);
                     },
                   );
                 },

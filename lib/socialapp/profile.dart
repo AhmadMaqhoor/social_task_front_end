@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:isd_project/socialapp/navigationbarsocial.dart';
 import 'package:isd_project/socialapp/profilepostcard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,6 +11,7 @@ class SocialProfilePage extends StatefulWidget {
 }
 
 class _SocialProfilePageState extends State<SocialProfilePage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   Map<String, dynamic> _userProfile = {};
   List<dynamic> _posts = [];
   bool _isLoading = true;
@@ -25,7 +27,7 @@ class _SocialProfilePageState extends State<SocialProfilePage> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/socialapp/show-all-user-posts'),
+      Uri.parse('http://192.168.0.105:8000/api/socialapp/show-all-user-posts'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -78,18 +80,25 @@ class _SocialProfilePageState extends State<SocialProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Profile'),
+        leading: IconButton(
+          onPressed: () {
+            _scaffoldKey.currentState?.openDrawer();
+          },
+          icon: const Icon(Icons.hide_source),
+        ),
+        title:const Text('Profile'),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Column(
                 children: [
                   buildProfileInfo(),
                   ListView.builder(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: _posts.length,
                     itemBuilder: (context, index) {
                       final post = _posts[index];
@@ -101,13 +110,15 @@ class _SocialProfilePageState extends State<SocialProfilePage> {
                         likesCount: post['likes_count'],
                         commentsCount: post['comment_count'],
                         postId: post['id'],
-                        fetchPosts: fetchPosts, // Pass fetchPosts as a parameter
+                        fetchPosts:
+                            fetchPosts, // Pass fetchPosts as a parameter
                       );
                     },
                   ),
                 ],
               ),
             ),
+      drawer: const NavSideBar(),
     );
   }
 }

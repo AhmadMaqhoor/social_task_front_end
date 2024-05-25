@@ -16,6 +16,10 @@ class UpcomingPage extends StatefulWidget {
 class _UpcomingPageState extends State<UpcomingPage> {
   String _selectedItem = 'My Tasks';
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  final GlobalKey<UpcomingTasksScreenState> _tasksScreenKey = GlobalKey();
+  final GlobalKey<UpcomingOrganizationTasksScreenState> _tasksScreenKeyOrganization = GlobalKey();
+
+
   late DateTime _selectedDate;
 
   @override
@@ -27,9 +31,9 @@ class _UpcomingPageState extends State<UpcomingPage> {
   Widget _buildTaskList(String selectedItem) {
     if (selectedItem == 'My Tasks') {
       // Fetch and display today's tasks
-      return UpcomingTasksScreen(selectedDate: _selectedDate);
+      return UpcomingTasksScreen(selectedDate: _selectedDate,key: _tasksScreenKey,);
     } else if (selectedItem == 'My Companies') {
-      return UpcomingOrganizationTasksScreen(selectedDate: _selectedDate);
+      return UpcomingOrganizationTasksScreen(selectedDate: _selectedDate,key:_tasksScreenKeyOrganization);
     } else {
       return Container(); // Fallback
     }
@@ -42,6 +46,11 @@ class _UpcomingPageState extends State<UpcomingPage> {
     print("$selectedDate");
   }
 
+ void _refetchTasks() {
+    _tasksScreenKey.currentState?.refetchTasks();
+        _tasksScreenKeyOrganization.currentState?.refetchTasks();
+
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -135,7 +144,7 @@ class _UpcomingPageState extends State<UpcomingPage> {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return AddTaskDialog();
+                      return AddTaskDialog(onTaskCreated: _refetchTasks);
                     },
                   );
                 },

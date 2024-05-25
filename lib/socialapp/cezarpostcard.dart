@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:isd_project/socialapp/commentspage.dart';
 import 'package:isd_project/socialapp/comment.dart';
 import 'package:isd_project/socialapp/addcomment.dart';
+import 'package:isd_project/socialapp/fullscreen.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PostCard extends StatefulWidget {
@@ -48,7 +50,7 @@ class _PostCardState extends State<PostCard> {
 
     final response = await http.get(
       Uri.parse(
-          'http://127.0.0.1:8000/api/socialapp/like-post-status-by/${widget.postId}'),
+          'http://192.168.0.105:8000/api/socialapp/like-post-status-by/${widget.postId}'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -72,7 +74,7 @@ class _PostCardState extends State<PostCard> {
 
     final response = await http.put(
       Uri.parse(
-          'http://127.0.0.1:8000/api/socialapp/like-post/${widget.postId}'),
+          'http://192.168.0.105:8000/api/socialapp/like-post/${widget.postId}'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',
@@ -97,14 +99,13 @@ class _PostCardState extends State<PostCard> {
     }
   }
 
-
   Future<void> fetchComments() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
       Uri.parse(
-          'http://127.0.0.1:8000/api/socialapp/comments/${widget.postId}'),
+          'http://192.168.0.105:8000/api/socialapp/comments/${widget.postId}'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -118,8 +119,6 @@ class _PostCardState extends State<PostCard> {
       print('Failed to load tasks');
     }
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -152,19 +151,31 @@ class _PostCardState extends State<PostCard> {
                     ),
                   ),
                 ),
-                
               ],
             ),
           ),
           // Post image
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.35,
-            width: double.infinity,
-            child: Image.network(
-              widget.postImage,
-              fit: BoxFit.cover,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FullScreenImageView(
+                    imageUrl: widget.postImage,
+                  ),
+                ),
+              );
+            },
+            child: AspectRatio(
+              aspectRatio:
+                  4 / 3, // You can adjust this ratio based on your preference
+              child: Image.network(
+                widget.postImage,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
+
           // Likes and comments
           Row(
             children: [
@@ -176,26 +187,18 @@ class _PostCardState extends State<PostCard> {
                 ),
               ),
               IconButton(
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddCommentDialog(
-          postId: widget.postId,
-        ),
-      ),
-    );
-  },
-  icon: const Icon(Icons.comment),
-),
-
-              IconButton(onPressed: () {}, icon: const Icon(Icons.share)),
-              Expanded(
-                  child: Align(
-                alignment: Alignment.bottomRight,
-                child: IconButton(
-                    onPressed: () {}, icon: const Icon(Icons.bookmark)),
-              ))
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AddCommentDialog(
+                        postId: widget.postId,
+                      );
+                    },
+                  );
+                },
+                icon: const Icon(Icons.comment),
+              ),
             ],
           ),
           // description and nb of comments
@@ -271,16 +274,6 @@ class _PostCardState extends State<PostCard> {
                         fontSize: 16,
                         color: Colors.black,
                       ),
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Text(
-                    'here is the date',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
                     ),
                   ),
                 ),

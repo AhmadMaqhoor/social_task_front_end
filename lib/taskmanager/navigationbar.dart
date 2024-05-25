@@ -30,7 +30,7 @@ class _NavSideBarState extends State<NavSideBar> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/taskapp/get-organizations'),
+      Uri.parse('http://192.168.0.105:8000/api/taskapp/get-organizations'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -130,7 +130,7 @@ class _NavSideBarState extends State<NavSideBar> {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return AddTaskDialog();
+                  return AddTaskDialog(onTaskCreated: () {  },);
                 },
               );
             },

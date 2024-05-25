@@ -45,8 +45,8 @@ class _SearchPageState extends State<SearchPage> {
   void _performSearch(String query) {
     setState(() {
       _searchResults = _users
-          .where((user) =>
-              user.name.toLowerCase().contains(query.toLowerCase()))
+          .where(
+              (user) => user.name.toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
   }
@@ -57,7 +57,7 @@ class _SearchPageState extends State<SearchPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:8000/api/socialapp/search-users-by-name'),
+        Uri.parse('http://192.168.0.105:8000/api/socialapp/search-users-by-name'),
         headers: <String, String>{
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
@@ -74,7 +74,8 @@ class _SearchPageState extends State<SearchPage> {
                     id: user['id'],
                     name: user['name'],
                     email: user['email'],
-                    image: user['image'] ?? '', // Use empty string if image is null
+                    image: user['image'] ??
+                        '', // Use empty string if image is null
                     score: user['score'],
                     rankProdactivityId: user['rank_prodactivity_id'],
                   ))
@@ -106,50 +107,47 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ],
           ),
-          Container(
-            padding: EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.all(
-                Radius.circular(30.0),
-              ),
-            ),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  color: Colors.black,
-                  onPressed: () {
-                    Navigator.popAndPushNamed(context, '/home');
-                  },
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(30.0),
                 ),
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search users',
-                      hintStyle: TextStyle(color: Colors.black),
-                      border: InputBorder.none,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: const InputDecoration(
+                        hintText: 'Search users',
+                        hintStyle: TextStyle(color: Colors.black),
+                        border: InputBorder.none,
+                      ),
+                      style: const TextStyle(color: Colors.black),
+                      onChanged: (value) {
+                        fetchSearchName(value); // Fetch data on each change
+                      },
                     ),
-                    style: TextStyle(color: Colors.black),
-                    onChanged: (value) {
-                      fetchSearchName(value); // Fetch data on each change
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    color: Colors.black,
+                    onPressed: () {
+                      fetchSearchName(_searchController
+                          .text); // Fetch data on search button press
                     },
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.search),
-                  color: Colors.black,
-                  onPressed: () {
-                    fetchSearchName(_searchController.text); // Fetch data on search button press
-                  },
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           Expanded(
             child: _searchResults.isEmpty
-                ? Center(child: Text('No results found'))
+                ? const Center(child: Text('No results found'))
                 : ListView.builder(
                     itemCount: _searchResults.length,
                     itemBuilder: (context, index) {
@@ -164,7 +162,8 @@ class _SearchPageState extends State<SearchPage> {
                           leading: CircleAvatar(
                             backgroundImage: user.image.isNotEmpty
                                 ? NetworkImage(user.image)
-                                : AssetImage('assets/default_avatar.png') as ImageProvider, // Provide a placeholder image
+                                : const AssetImage('assets/default_avatar.png')
+                                    as ImageProvider, // Provide a placeholder image
                           ),
                           title: Text(user.name),
                         ),
