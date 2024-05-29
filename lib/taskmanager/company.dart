@@ -181,7 +181,7 @@ class _InviteMembersDialogState extends State<InviteMembersDialog> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.post(
-      Uri.parse('http://192.168.0.105:8000/api/taskapp/organizations/${widget.companyId}/send-invitation'),
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/organizations/${widget.companyId}/send-invitation'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',

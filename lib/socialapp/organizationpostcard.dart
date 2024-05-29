@@ -48,7 +48,7 @@ class _OrganizationPostCardState extends State<OrganizationPostCard> {
 
     final response = await http.get(
       Uri.parse(
-          'http://192.168.0.105:8000/api/socialapp/like-organization-post-status-by/${widget.postId}'),
+          'http://127.0.0.1:8000/api/socialapp/like-organization-post-status-by/${widget.postId}'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -72,7 +72,7 @@ class _OrganizationPostCardState extends State<OrganizationPostCard> {
 
     final response = await http.put(
       Uri.parse(
-          'http://192.168.0.105:8000/api/socialapp/like-organization-post/${widget.postId}'),
+          'http://127.0.0.1:8000/api/socialapp/like-organization-post/${widget.postId}'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',
@@ -104,7 +104,7 @@ class _OrganizationPostCardState extends State<OrganizationPostCard> {
 
   final response = await http.get(
     Uri.parse(
-        'http://192.168.0.105:8000/api/socialapp/organization-comments/${widget.postId}'),
+        'http://127.0.0.1:8000/api/socialapp/organization-comments/${widget.postId}'),
     headers: <String, String>{
       'Authorization': 'Bearer $accessToken',
     },

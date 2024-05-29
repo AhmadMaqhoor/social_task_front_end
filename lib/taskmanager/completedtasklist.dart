@@ -22,7 +22,7 @@ class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://192.168.0.105:8000/api/taskapp/completed-tasks'),
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/completed-tasks'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -43,7 +43,7 @@ class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
 
     final response = await http.put(
       Uri.parse(
-          'http://192.168.0.105:8000/api/taskapp/update-task-completion/$taskId'),
+          'http://127.0.0.1:8000/api/taskapp/update-task-completion/$taskId'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ class _CompletedTasksScreenState extends State<CompletedTasksScreen> {
                 // Proceed with task deletion
                 final response = await http.delete(
                   Uri.parse(
-                      'http://192.168.0.105:8000/api/taskapp/remove-task/$taskId'),
+                      'http://127.0.0.1:8000/api/taskapp/remove-task/$taskId'),
                   headers: <String, String>{
                     'Authorization': 'Bearer $accessToken',
                   },

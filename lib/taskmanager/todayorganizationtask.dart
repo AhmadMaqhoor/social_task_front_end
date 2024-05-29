@@ -29,7 +29,7 @@ class TodayOrganizationTasksScreenState
 
     final response = await http.get(
       Uri.parse(
-          'http://192.168.0.105:8000/api/taskapp/organizationstasks/today-assigned'),
+          'http://127.0.0.1:8000/api/taskapp/organizationstasks/today-assigned'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -37,7 +37,7 @@ class TodayOrganizationTasksScreenState
 
     if (response.statusCode == 200) {
       setState(() {
-        tasks = jsonDecode(response.body)['assigned_messages'];
+        tasks = jsonDecode(response.body)['assigned_tasks'];
       });
     } else {
       print('Failed to load tasks');
@@ -50,7 +50,7 @@ class TodayOrganizationTasksScreenState
 
     final response = await http.put(
       Uri.parse(
-          'http://192.168.0.105:8000/api/taskapp/organization-task/update-task-completion/$taskId'),
+          'http://127.0.0.1:8000/api/taskapp/organization-task/update-task-completion/$taskId'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',

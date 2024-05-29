@@ -42,7 +42,7 @@ class UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
 
     final response = await http.post(
       Uri.parse(
-          'http://192.168.0.105:8000/api/taskapp/tasks-for-upcoming?_method=GET'),
+          'http://127.0.0.1:8000/api/taskapp/tasks-for-upcoming?_method=GET'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -69,7 +69,7 @@ class UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
 
     final response = await http.put(
       Uri.parse(
-          'http://192.168.0.105:8000/api/taskapp/update-task-completion/$taskId'),
+          'http://127.0.0.1:8000/api/taskapp/update-task-completion/$taskId'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ class UpcomingTasksScreenState extends State<UpcomingTasksScreen> {
                 Navigator.of(context).pop();
                 final response = await http.delete(
                   Uri.parse(
-                      'http://192.168.0.105:8000/api/taskapp/remove-task/$taskId'),
+                      'http://127.0.0.1:8000/api/taskapp/remove-task/$taskId'),
                   headers: <String, String>{
                     'Authorization': 'Bearer $accessToken',
                   },
@@ -213,7 +213,7 @@ class _TaskDetailsDialogState extends State<TaskDetailsDialog> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.put(
-      Uri.parse('http://192.168.0.105:8000/api/taskapp/update-task/${widget.task['id']}'),
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/update-task/${widget.task['id']}'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',

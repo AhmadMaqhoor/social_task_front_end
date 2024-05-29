@@ -40,7 +40,7 @@ class _CreateCompanyState extends State<CreateCompany> {
     // Prepare the multipart request
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://192.168.0.105:8000/api/taskapp/add-organization'),
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/add-organization'),
     );
 
     request.headers.addAll(<String, String>{

@@ -36,7 +36,7 @@ class _ProductivityPageState extends State<ProductivityPage> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://192.168.0.105:8000/api/taskapp/show-prodactivity'),
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/show-prodactivity'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },

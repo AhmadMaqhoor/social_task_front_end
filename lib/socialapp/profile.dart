@@ -27,7 +27,7 @@ class _SocialProfilePageState extends State<SocialProfilePage> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://192.168.0.105:8000/api/socialapp/show-all-user-posts'),
+      Uri.parse('http://127.0.0.1:8000/api/socialapp/show-all-user-posts'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },

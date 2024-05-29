@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.get(
-      Uri.parse('http://192.168.0.105:8000/api/taskapp/get-member-organizations'),
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/get-member-organizations'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -59,7 +59,7 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.0.105:8000/api/socialapp/show-all-organization-posts-by/${organizationId == -1 ? '' : organizationId.toString()}'),
+        Uri.parse('http://127.0.0.1:8000/api/socialapp/show-all-organization-posts-by/${organizationId == -1 ? '' : organizationId.toString()}'),
         headers: <String, String>{
           'Authorization': 'Bearer $accessToken',
         },
@@ -145,7 +145,7 @@ class _HomePageState extends State<HomePage> {
                         username: post['user_profile']['name'],
                         userProfileImage: post['user_profile']['image'] ?? 'https://via.placeholder.com/150',
                         postImage: post['image_path'] ?? 'https://via.placeholder.com/600',
-                        caption: post['caption'],
+                        caption: post['caption'] ?? '',
                         likesCount: post['likes_count'],
                         commentsCount: post['comment_count'],
                         postId: post['id'],

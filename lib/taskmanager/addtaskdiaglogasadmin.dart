@@ -51,7 +51,7 @@ class _AddTaskDialogAsAdminState extends State<AddTaskDialogAsAdmin> {
     print('Access Token: $accessToken');
 
     final response = await http.post(
-      Uri.parse('http://192.168.0.105:8000/api/taskapp/organization-by-/${widget.companyId}/create-task'),
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/organization-by-/${widget.companyId}/create-task'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',
@@ -105,7 +105,7 @@ class _AddTaskDialogAsAdminState extends State<AddTaskDialogAsAdmin> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.0.105:8000/api/taskapp/organizations/${widget.companyId}/members'),
+        Uri.parse('http://127.0.0.1:8000/api/taskapp/organizations/${widget.companyId}/members'),
         headers: <String, String>{
           'Authorization': 'Bearer $accessToken',
         },

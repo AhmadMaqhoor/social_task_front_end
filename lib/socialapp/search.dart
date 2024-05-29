@@ -57,7 +57,7 @@ class _SearchPageState extends State<SearchPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.0.105:8000/api/socialapp/search-users-by-name'),
+        Uri.parse('http://127.0.0.1:8000/api/socialapp/search-users-by-name'),
         headers: <String, String>{
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',

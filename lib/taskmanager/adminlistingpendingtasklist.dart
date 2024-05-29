@@ -30,7 +30,7 @@ class AdminListingPendingTaskScreenState
 
     final response = await http.get(
       Uri.parse(
-          'http://192.168.0.105:8000/api/taskapp/organizationstasks/${widget.companyId}/admin/assigned-tasks/pending'),
+          'http://127.0.0.1:8000/api/taskapp/organizationstasks/${widget.companyId}/admin/assigned-tasks/pending'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
       },
@@ -66,7 +66,7 @@ class AdminListingPendingTaskScreenState
                 // Proceed with task deletion
                 final response = await http.delete(
                   Uri.parse(
-                      'http://192.168.0.105:8000/api/taskapp/organization-task/admin/remove-task-by/$taskId'),
+                      'http://127.0.0.1:8000/api/taskapp/organization-task/admin/remove-task-by/$taskId'),
                   headers: <String, String>{
                     'Authorization': 'Bearer $accessToken',
                   },
@@ -177,7 +177,7 @@ class _TaskDetailsDialogState extends State<TaskDetailsDialog> {
 
     final response = await http.put(
       Uri.parse(
-          'http://192.168.0.105:8000/api/taskapp/organization-task/admin/update-task-by/${widget.task['id']}'),
+          'http://127.0.0.1:8000/api/taskapp/organization-task/admin/update-task-by/${widget.task['id']}'),
       headers: <String, String>{
         'Authorization': 'Bearer $accessToken',
         'Content-Type': 'application/json',

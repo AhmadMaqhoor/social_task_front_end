@@ -23,7 +23,7 @@ class _SetGoalsPagePerDayState extends State<SetGoalsPagePerDay> {
     final String accessToken = prefs.getString('accessToken') ?? '';
 
     final response = await http.put(
-      Uri.parse('http://192.168.0.105:8000/api/taskapp/update-max-prodactivity-per-day/${widget.productivityId}'),
+      Uri.parse('http://127.0.0.1:8000/api/taskapp/update-max-prodactivity-per-day/${widget.productivityId}'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $accessToken',
